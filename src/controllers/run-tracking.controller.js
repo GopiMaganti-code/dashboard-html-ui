@@ -1,0 +1,66 @@
+;(function(global){
+  function initDashboardRunTracking(deps){
+    if (!global.AppRunTrackingPanel || typeof global.AppRunTrackingPanel.renderRunTrackingPanels !== 'function') return;
+
+    function render(){
+      global.AppRunTrackingPanel.renderRunTrackingPanels({
+        getRecentRows: deps.getRecentRows,
+        getAcceptanceRun: deps.getAcceptanceRun,
+        getMessagesRun: deps.getMessagesRun,
+        isAcceptanceRunning: deps.isAcceptanceRunning,
+        isMessagesRunning: deps.isMessagesRunning,
+        statusPill: deps.statusPill
+      });
+      var aBtn = document.getElementById('dashboard-acceptance-run-btn');
+      var mBtn = document.getElementById('dashboard-messages-run-btn');
+      if (aBtn) aBtn.addEventListener('click', onRunAcceptance);
+      if (mBtn) mBtn.addEventListener('click', onRunMessages);
+    }
+
+    function onRunAcceptance(){
+      if (deps.isAcceptanceRunning()) return;
+      deps.setAcceptanceRunning(true);
+      deps.log('ACCEPTANCE_RUN_START', { campaign_id: deps.getCampaignId() });
+      render();
+      deps.runAcceptance().then(function(run){
+        deps.saveAcceptanceRun(run);
+        if (run.status === 'failed') deps.pushFailure('acceptance_run', run);
+        deps.log('ACCEPTANCE_RUN_END', { campaign_id: run.campaign_id, status: run.status, accepted_count: run.accepted_count, new_reference_node: run.new_reference_node });
+      }).catch(function(err){
+        var run = deps.makeFailedAcceptanceRun(err && err.message ? err.message : 'Acceptance run failed.');
+        deps.saveAcceptanceRun(run);
+        deps.pushFailure('acceptance_run', run);
+        deps.log('ACCEPTANCE_RUN_END', { campaign_id: run.campaign_id, status: run.status, accepted_count: run.accepted_count, new_reference_node: run.new_reference_node });
+      }).finally(function(){
+        deps.setAcceptanceRunning(false);
+        render();
+      });
+    }
+
+    function onRunMessages(){
+      if (deps.isMessagesRunning()) return;
+      deps.setMessagesRunning(true);
+      deps.log('MESSAGES_RUN_START', { campaign_id: deps.getCampaignId() });
+      render();
+      deps.runMessages().then(function(run){
+        deps.saveMessagesRun(run);
+        if (run.status === 'failed') deps.pushFailure('messages_run', run);
+        deps.log('MESSAGES_RUN_END', { campaign_id: run.campaign_id, status: run.status, leads_processed: run.leads_processed, replies_detected: run.replies_detected, failed_count: run.failed_count });
+      }).catch(function(err){
+        var run = deps.makeFailedMessagesRun(err && err.message ? err.message : 'Messages run failed.');
+        deps.saveMessagesRun(run);
+        deps.pushFailure('messages_run', run);
+        deps.log('MESSAGES_RUN_END', { campaign_id: run.campaign_id, status: run.status, leads_processed: run.leads_processed, replies_detected: run.replies_detected, failed_count: run.failed_count });
+      }).finally(function(){
+        deps.setMessagesRunning(false);
+        render();
+      });
+    }
+
+    render();
+  }
+
+  global.AppRunTrackingController = {
+    initDashboardRunTracking: initDashboardRunTracking
+  };
+})(window);
