@@ -24,6 +24,13 @@
       render();
       deps.runAcceptance().then(function(run){
         deps.saveAcceptanceRun(run);
+        if (global.AppRunTrackingService && typeof global.AppRunTrackingService.persistRun === 'function') {
+          global.AppRunTrackingService.persistRun({
+            type: 'acceptance',
+            campaign_id: deps.getCampaignId(),
+            payload: run
+          });
+        }
         if (run.status === 'failed') deps.pushFailure('acceptance_run', run);
         deps.log('ACCEPTANCE_RUN_END', { campaign_id: run.campaign_id, status: run.status, accepted_count: run.accepted_count, new_reference_node: run.new_reference_node });
       }).catch(function(err){
@@ -44,6 +51,13 @@
       render();
       deps.runMessages().then(function(run){
         deps.saveMessagesRun(run);
+        if (global.AppRunTrackingService && typeof global.AppRunTrackingService.persistRun === 'function') {
+          global.AppRunTrackingService.persistRun({
+            type: 'messages',
+            campaign_id: deps.getCampaignId(),
+            payload: run
+          });
+        }
         if (run.status === 'failed') deps.pushFailure('messages_run', run);
         deps.log('MESSAGES_RUN_END', { campaign_id: run.campaign_id, status: run.status, leads_processed: run.leads_processed, replies_detected: run.replies_detected, failed_count: run.failed_count });
       }).catch(function(err){

@@ -162,34 +162,73 @@
     <div class="meta-card"><div class="meta-label">Total leads</div><div class="meta-value">58</div></div>
     <div class="meta-card"><div class="meta-label">Started leads</div><div class="meta-value">13</div></div>
     <div class="meta-card"><div class="meta-label">Progress</div><div class="meta-value">0.94%</div><div class="pb-bg"><div class="pb-fill" style="width:0.94%;"></div></div></div>
-    <div class="meta-card"><div class="meta-label">Updated at</div><div class="meta-value" style="font-size:15px;">6/4/2026</div><div class="stat-trend">6:24 PM (GMT+5:30)</div></div>
+    <div class="meta-card"><div class="meta-label">Updated at</div><div class="meta-value" id="dashboard-meta-updated-date" style="font-size:15px;">6/4/2026</div><div class="stat-trend" id="dashboard-meta-updated-time">6:24 PM (GMT+5:30)</div></div>
   </div>
+
+  <div id="dashboard-activity-stale-banner" class="activity-stale-banner" role="status" hidden></div>
+  <div id="dashboard-alerts-panel" class="panel alerts-panel" aria-live="polite"></div>
 
   <div class="sec-title">Activity — click any card to see leads</div>
   <div class="stats-grid">
-    <div class="stat-card" onclick="showDetail('recent-runs')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('recent-runs')">
+    <div class="stat-card" data-stat-key="recent-runs" onclick="showDetail('recent-runs')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('recent-runs')">
       <div class="stat-icon" style="background:#E6F1FB;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
       <div class="stat-num">10</div><div class="stat-lbl">Recent runs</div><div class="stat-trend trend-up">↑ last 24h</div>
     </div>
-    <div class="stat-card" onclick="showDetail('connections-sent')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('connections-sent')">
+    <div class="stat-card" data-stat-key="connections-sent" onclick="showDetail('connections-sent')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('connections-sent')">
       <div class="stat-icon" style="background:#E1F5EE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0F6E56" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></div>
       <div class="stat-num">12</div><div class="stat-lbl">Connections sent</div><div class="stat-trend trend-up">↑ 3 pending</div>
     </div>
-    <div class="stat-card" onclick="showDetail('profile-views')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('profile-views')">
+    <div class="stat-card" data-stat-key="profile-views" onclick="showDetail('profile-views')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('profile-views')">
       <div class="stat-icon" style="background:#EEEDFE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></div>
       <div class="stat-num">8</div><div class="stat-lbl">Profile views</div><div class="stat-trend">→ steady</div>
     </div>
-    <div class="stat-card" onclick="showDetail('posts-liked')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('posts-liked')">
+    <div class="stat-card" data-stat-key="posts-liked" onclick="showDetail('posts-liked')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('posts-liked')">
       <div class="stat-icon" style="background:#FAEEDA;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div>
       <div class="stat-num">15</div><div class="stat-lbl">Posts liked</div><div class="stat-trend trend-up">↑ most active</div>
     </div>
-    <div class="stat-card" onclick="showDetail('messages-sent')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('messages-sent')">
+    <div class="stat-card" data-stat-key="messages-sent" onclick="showDetail('messages-sent')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('messages-sent')">
       <div class="stat-icon" style="background:#FBEAF0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#993556" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
       <div class="stat-num">4</div><div class="stat-lbl">Messages</div><div class="stat-trend">→ 2 replied</div>
     </div>
-    <div class="stat-card" onclick="showDetail('accepted-profiles')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('accepted-profiles')">
+    <div class="stat-card" data-stat-key="accepted-profiles" onclick="showDetail('accepted-profiles')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('accepted-profiles')">
       <div class="stat-icon" style="background:#EAF3DE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
       <div class="stat-num">3</div><div class="stat-lbl">Accepted profiles</div><div class="stat-trend trend-up">↑ 23% rate</div>
+    </div>
+    <div class="stat-card stat-card--static" data-stat-key="success-rate" role="group" aria-label="Success rate" tabindex="0">
+      <div class="stat-icon" style="background:#ecfdf5;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#166534" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <div class="stat-num">—</div><div class="stat-lbl">Success rate</div><div class="stat-trend">—</div>
+    </div>
+    <div class="stat-card stat-card--static" data-stat-key="failure-rate" role="group" aria-label="Failure rate" tabindex="0">
+      <div class="stat-icon" style="background:#fef2f2;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg></div>
+      <div class="stat-num">—</div><div class="stat-lbl">Failure rate</div><div class="stat-trend">—</div>
+    </div>
+    <div class="stat-card stat-card--static" data-stat-key="health-score" role="group" aria-label="Automation health score" tabindex="0">
+      <div class="stat-icon" style="background:#e0f2fe;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+      <div class="stat-num">—</div><div class="stat-lbl">Health score</div><div class="stat-trend health-score-status" id="health-score-status">—</div>
+    </div>
+  </div>
+
+  <div id="session-network-panel" class="session-network-mount" aria-label="Session and network monitoring"></div>
+
+  <div id="monitoring-advanced-slot" class="monitoring-advanced-slot" aria-label="Monitoring insights">
+    <div class="monitoring-advanced-grid monitoring-widgets-grid">
+      <div class="monitoring-card monitoring-card--live" id="widget-top-failures">
+        <div class="monitoring-card-title">Top failure types</div>
+        <p class="monitoring-card-note">Share of recent failed actions.</p>
+        <ul class="monitoring-widget-list" id="top-failures-list">
+          <li class="mw-empty">—</li>
+        </ul>
+      </div>
+      <div class="monitoring-card monitoring-card--live" id="widget-run-health">
+        <div class="monitoring-card-title">Run health</div>
+        <p class="monitoring-card-note" id="run-health-source">From last stored runs</p>
+        <dl class="monitoring-dl monitoring-dl--run-health">
+          <dt>Processed</dt><dd id="rh-processed">—</dd>
+          <dt>Success runs</dt><dd id="rh-success">—</dd>
+          <dt>Failed runs</dt><dd id="rh-failed">—</dd>
+          <dt>Success rate</dt><dd id="rh-rate">—</dd>
+        </dl>
+      </div>
     </div>
   </div>
 
@@ -429,6 +468,7 @@
       <h2 id="logs-modal-title">Execution logs</h2>
       <div class="logs-modal-reason" id="logs-modal-reason"></div>
       <div class="logs-modal-time" id="logs-modal-time"></div>
+      <div class="logs-modal-structured" id="logs-modal-structured" hidden></div>
     </div>
     <div class="logs-modal-toolbar">
       <input type="search" class="logs-modal-search" id="logs-modal-search" placeholder="Search in logs…" autocomplete="off" aria-label="Search in logs" />
@@ -457,6 +497,7 @@
 <script src="./src/utils/escape.js"></script>
 <script src="./src/utils/validators.js"></script>
 <script src="./src/utils/formatters.js"></script>
+<script src="./src/services/monitoring-metrics.service.js"></script>
 <script src="./src/state/persistence.js"></script>
 <script src="./src/services/campaign.service.js"></script>
 <script src="./src/components/layout/header-status.js"></script>
@@ -471,9 +512,14 @@
 <script src="./src/services/failed-actions.service.js"></script>
 <script src="./src/components/dashboard/failed-actions-panel.js"></script>
 <script src="./src/services/api-client.service.js"></script>
-<script src="./src/services/api-integration.service.js"></script>
+    <script src="./src/services/api-integration.service.js"></script>
+    <script src="./src/services/session-network.service.js"></script>
+<script src="./src/services/run-tracking.service.js"></script>
 <script src="./src/services/messages-run.service.js"></script>
-<script src="./src/components/dashboard/run-tracking-panel.js"></script>
+<script src="./src/components/dashboard/alerts-panel.js"></script>
+<script src="./src/components/dashboard/monitoring-placeholders.js"></script>
+    <script src="./src/components/dashboard/session-network-panel.js"></script>
+    <script src="./src/components/dashboard/run-tracking-panel.js"></script>
 <script src="./src/controllers/run-tracking.controller.js"></script>
 <script src="./src/components/detail/detail-table.js"></script>
 <script src="./src/controllers/detail.controller.js"></script>
@@ -735,6 +781,13 @@ function mapApiCampaign(item){
 }
 
 function mapApiDetailRow(row){
+  var t = row.time || '';
+  if (t && window.AppUtilsFormatters && typeof window.AppUtilsFormatters.normalizeTimestampToIso === 'function') {
+    if (/^\d{4}-\d{2}-\d{2}/.test(String(t)) || String(t).indexOf('T') >= 0) {
+      var iso = window.AppUtilsFormatters.normalizeTimestampToIso(t);
+      if (iso && /^\d{4}-\d{2}-\d{2}T/.test(iso)) t = iso;
+    }
+  }
   return {
     name: row.name || '',
     initials: row.initials || '',
@@ -743,11 +796,15 @@ function mapApiDetailRow(row){
     url: row.url || '',
     action: row.action || '',
     status: row.status || '',
-    time: row.time || ''
+    time: t
   };
 }
 
 function getDashboardStatCardByKey(key){
+  if (key) {
+    var byAttr = document.querySelector('#screen-dashboard .stat-card[data-stat-key="' + key + '"]');
+    if (byAttr) return byAttr;
+  }
   var cards = document.querySelectorAll('#screen-dashboard .stat-card');
   for (var i = 0; i < cards.length; i++) {
     var onclickAttr = cards[i].getAttribute('onclick') || '';
@@ -785,14 +842,206 @@ function mapOverviewChart(overviewChart){
 }
 
 function mapFailedActionSummaryItem(f){
+  var logs = f.logs != null ? String(f.logs) : '';
+  var mm = window.AppMonitoringMetrics;
+  var classified = mm && typeof mm.classifyFailure === 'function'
+    ? mm.classifyFailure(logs, f.reason || '')
+    : { code: 'OTHER', severity: 'minor', label: 'Other' };
+  var fromApi = f.failure_type && mm && typeof mm.normalizeFailureCode === 'function'
+    ? mm.normalizeFailureCode(f.failure_type)
+    : null;
+  var code = (fromApi && fromApi !== 'OTHER') ? fromApi : classified.code;
+  var failureSev = f.failure_severity || (mm && mm.SEVERITY_BY_CODE && mm.SEVERITY_BY_CODE[code]) || classified.severity;
   return {
     id: f.id || '',
     lead: f.lead || '',
     reason: f.reason || '',
     timestamp: f.timestamp || '',
     screenshot_url: f.screenshot_url || (f.has_screenshot ? ('https://picsum.photos/seed/' + encodeURIComponent(f.id || 'fallback') + '/960/540') : ''),
-    logs: f.logs || (f.has_logs ? ('[failed_action] id=' + (f.id || 'n/a') + ' campaign=' + (f.campaign_id || 'n/a')) : '')
+    logs: logs || (f.has_logs ? ('[failed_action] id=' + (f.id || 'n/a') + ' campaign=' + (f.campaign_id || 'n/a')) : ''),
+    failure_type: code,
+    failure_severity: failureSev,
+    script_name: f.script_name || (f.failure && f.failure.script_name) || '',
+    stack_trace: f.stack_trace || (f.failure && f.failure.stack_trace) || '',
+    structured: f.failure || null
   };
+}
+
+function classifyFailureForItem(item){
+  var mm = window.AppMonitoringMetrics;
+  if (mm && typeof mm.classifyFailure === 'function') {
+    var fromApi = item && item.failure_type && typeof mm.normalizeFailureCode === 'function'
+      ? mm.normalizeFailureCode(item.failure_type)
+      : null;
+    var cf = mm.classifyFailure(item && item.logs, item && item.reason);
+    var code = (fromApi && fromApi !== 'OTHER') ? fromApi : cf.code;
+    var sev = (item && item.failure_severity) || (mm.SEVERITY_BY_CODE && mm.SEVERITY_BY_CODE[code]) || cf.severity;
+    var label = mm.getFailureDisplayLabel ? mm.getFailureDisplayLabel(code) : String(code);
+    return { code: code, severity: sev, label: label, type: label };
+  }
+  return { code: 'OTHER', severity: 'minor', label: 'Other', type: 'Other' };
+}
+
+function updateMonitoringInsightWidgets(failedActions, runState, apiRuns){
+  if (!window.AppMonitoringMetrics) return;
+  var mm = AppMonitoringMetrics;
+
+  var topList = document.getElementById('top-failures-list');
+  if (topList && typeof mm.aggregateTopFailureTypes === 'function') {
+    var agg = mm.aggregateTopFailureTypes(failedActions || [], 2);
+    if (agg.total === 0) {
+      topList.innerHTML = '<li class="mw-empty">No failed actions in view.</li>';
+    } else {
+      topList.innerHTML = agg.top.map(function(row){
+        return '<li><span class="mw-label">' + escapeHtml(row.label) + '</span> <span class="mw-val">' +
+          row.percent.toFixed(0) + '% (' + row.count + ')</span></li>';
+      }).join('');
+      if (agg.top.length === 0) {
+        topList.innerHTML = '<li class="mw-empty">—</li>';
+      }
+    }
+  }
+
+  var rhSrc = document.getElementById('run-health-source');
+  var rhP = document.getElementById('rh-processed');
+  var rhS = document.getElementById('rh-success');
+  var rhF = document.getElementById('rh-failed');
+  var rhRate = document.getElementById('rh-rate');
+  if (typeof mm.summarizeRunHealth === 'function') {
+    var sum = mm.summarizeRunHealth(apiRuns || null, runState || {});
+    if (rhSrc) rhSrc.textContent = sum.source === 'api' ? 'From runs API (merged with local)' : 'From last stored runs';
+    if (rhP) rhP.textContent = sum.processed > 0 ? String(sum.processed) : '—';
+    if (rhS) rhS.textContent = String(sum.successRuns);
+    if (rhF) rhF.textContent = String(sum.failedRuns);
+    if (rhRate) rhRate.textContent = sum.successRate == null ? '—' : (sum.successRate * 100).toFixed(1) + '%';
+  }
+}
+
+function refreshDashboardMonitoring(){
+  if (!window.AppMonitoringMetrics) return;
+  try {
+    var dataMap = typeof DATA !== 'undefined' && DATA ? DATA : {};
+    var failedCount = typeof FAILED_ACTIONS !== 'undefined' && Array.isArray(FAILED_ACTIONS) ? FAILED_ACTIONS.length : 0;
+    var failedActions = typeof FAILED_ACTIONS !== 'undefined' && Array.isArray(FAILED_ACTIONS) ? FAILED_ACTIONS : [];
+    var runState = typeof getRunTrackingState === 'function' ? getRunTrackingState(getRunTrackingCampaignId()) : {};
+    var total = AppMonitoringMetrics.computeTotalActionsFromRunState(runState);
+    var rates = AppMonitoringMetrics.computeRates(total, failedCount);
+    var health = AppMonitoringMetrics.computeAutomationHealth({
+      dataMap: dataMap,
+      runState: runState,
+      rates: rates,
+      failedCount: failedCount
+    });
+
+    updateMonitoringInsightWidgets(failedActions, runState, window.__lastRunsApiData || null);
+
+    var srEl = document.querySelector('#screen-dashboard [data-stat-key="success-rate"] .stat-num');
+    var frEl = document.querySelector('#screen-dashboard [data-stat-key="failure-rate"] .stat-num');
+    var srTrend = document.querySelector('#screen-dashboard [data-stat-key="success-rate"] .stat-trend');
+    var frTrend = document.querySelector('#screen-dashboard [data-stat-key="failure-rate"] .stat-trend');
+    if (srEl) srEl.textContent = rates.successRate == null ? '—' : (rates.successRate * 100).toFixed(1) + '%';
+    if (frEl) frEl.textContent = rates.failureRate == null ? '—' : (rates.failureRate * 100).toFixed(1) + '%';
+    if (srTrend) srTrend.textContent = total > 0 ? 'Run-based: ' + total + ' actions' : 'No run payloads yet';
+    if (frTrend) frTrend.textContent = failedCount + ' failed / ' + (total > 0 ? total : '—') + ' total';
+
+    var hNum = document.querySelector('#screen-dashboard [data-stat-key="health-score"] .stat-num');
+    var hTrend = document.getElementById('health-score-status') || document.querySelector('#screen-dashboard [data-stat-key="health-score"] .stat-trend');
+    if (hNum) hNum.textContent = health.percent == null ? '—' : health.percent.toFixed(1) + '%';
+    if (hTrend) {
+      hTrend.textContent = health.status || '—';
+      hTrend.className = 'stat-trend health-score-status health-score--' + (health.statusKey || 'unknown');
+    }
+
+    if (typeof __overviewChartPayload !== 'undefined' && __overviewChartPayload) {
+      AppMonitoringMetrics.applyTrendsToStatCards(__overviewChartPayload);
+    }
+
+    var latestMs = AppMonitoringMetrics.getLatestActivityMs(dataMap, runState);
+    var banner = document.getElementById('dashboard-activity-stale-banner');
+    if (banner) {
+      var stale = latestMs != null && (Date.now() - latestMs > 24 * 60 * 60 * 1000);
+      banner.hidden = !stale;
+      banner.textContent = stale ? '⚠️ No activity in last 24 hours' : '';
+    }
+
+    var alerts = AppMonitoringMetrics.buildAlerts({
+      dataMap: dataMap,
+      failedCount: failedCount,
+      totalActions: total,
+      runState: runState
+    });
+    if (window.AppAlertsPanel && typeof window.AppAlertsPanel.renderAlertsPanel === 'function') {
+      window.AppAlertsPanel.renderAlertsPanel('dashboard-alerts-panel', alerts);
+    }
+
+    if (window.AppLogger && typeof window.AppLogger.info === 'function') {
+      window.AppLogger.info('MONITORING_REFRESH', {
+        totalActions: total,
+        failedCount: failedCount,
+        successRate: rates.successRate,
+        failureRate: rates.failureRate,
+        healthScore: health.score
+      });
+    }
+
+    if (window.AppRunTrackingService && typeof window.AppRunTrackingService.fetchRuns === 'function') {
+      var cid = typeof getRunTrackingCampaignId === 'function' ? getRunTrackingCampaignId() : '';
+      window.AppRunTrackingService.fetchRuns({ campaign_id: cid, limit: 50 }).then(function(apiRuns){
+        window.__lastRunsApiData = apiRuns;
+        updateMonitoringInsightWidgets(failedActions, runState, apiRuns);
+      });
+    }
+  } catch (err) {
+    if (window.AppLogger && typeof window.AppLogger.warn === 'function') {
+      window.AppLogger.warn('MONITORING_REFRESH_ERR', { message: err && err.message ? err.message : String(err) });
+    }
+  }
+}
+
+function refreshSessionNetworkPanel(){
+  if (!window.AppSessionNetworkPanel || typeof window.AppSessionNetworkPanel.renderSessionNetworkPanel !== 'function') return;
+  var esc = typeof escapeHtml === 'function' ? escapeHtml : function(s){
+    var d = document.createElement('div');
+    d.textContent = s == null ? '' : String(s);
+    return d.innerHTML;
+  };
+  try {
+    var useApi = window.AppConfig && window.AppConfig.useApi === true;
+    if (!useApi) {
+      window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', null, { escapeHtml: esc, loaded: true });
+      return;
+    }
+    window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', null, { escapeHtml: esc, loaded: false });
+    if (!window.AppApiIntegration || typeof window.AppApiIntegration.getSessionInfo !== 'function') {
+      window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', null, { escapeHtml: esc, loaded: true });
+      return;
+    }
+    var cid = typeof getRunTrackingCampaignId === 'function' ? getRunTrackingCampaignId() : '';
+    window.AppApiIntegration.getSessionInfo({ campaign_id: cid }).then(function(raw){
+      if (window.AppLogger && typeof window.AppLogger.info === 'function') {
+        window.AppLogger.info('SESSION_INFO_FETCH', { ok: raw != null, campaign_id: cid });
+      }
+      window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', raw, { escapeHtml: esc, loaded: true });
+    });
+  } catch (e) {
+    if (window.AppLogger && typeof window.AppLogger.warn === 'function') {
+      window.AppLogger.warn('SESSION_NETWORK_REFRESH_ERR', { message: e && e.message ? e.message : String(e) });
+    }
+    window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', null, { escapeHtml: esc, loaded: true });
+  }
+}
+
+function hydrateRunsFromApi(){
+  if (!window.AppRunTrackingService || typeof window.AppRunTrackingService.fetchRuns !== 'function') {
+    return Promise.resolve(null);
+  }
+  var cid = getRunTrackingCampaignId();
+  return window.AppRunTrackingService.fetchRuns({ campaign_id: cid, limit: 50 }).then(function(data){
+    if (window.AppLogger && data && Array.isArray(data.items)) {
+      window.AppLogger.info('RUNS_API_FETCH', { count: data.items.length, campaign_id: cid });
+    }
+    return data;
+  });
 }
 
 function hydrateCampaignsFromApi(){
@@ -876,6 +1125,8 @@ function hydrateOverviewFromApi(){
     return false;
   }).finally(function(){
     setGlobalLoading(false);
+    refreshDashboardMonitoring();
+    hydrateRunsFromApi();
   });
 }
 
@@ -2312,6 +2563,7 @@ function sendDummyChatLine(){
       getThreads: function(){ return MESSAGES_THREADS; },
       getActiveConvId: function(){ return activeConvId; },
       setActiveConvId: function(v){ activeConvId = v; },
+      getActiveTab: function(){ return activeMessagesTab; },
       escapeHtml: escapeHtml
     });
   }
@@ -2498,6 +2750,7 @@ function goBack(){
   var inbox = document.getElementById('detail-campaign-inbox');
   if (inbox) inbox.classList.remove('campaign-inbox--chat');
   resizeActivityChart();
+  refreshDashboardMonitoring();
 }
 
 function resizeActivityChart(){
@@ -2668,6 +2921,13 @@ function fetchFailedActionLogs(item){
   if (item && item.id && window.AppApiIntegration && typeof window.AppApiIntegration.getFailedActionDetail === 'function') {
     return window.AppApiIntegration.getFailedActionDetail(item.id).then(function(resp){
       if (!resp) throw new Error('No logs available for this action.');
+      if (resp.failure_type) item.failure_type = resp.failure_type;
+      if (resp.failure_severity) item.failure_severity = resp.failure_severity;
+      if (resp.script_name) item.script_name = resp.script_name;
+      if (resp.stack_trace) item.stack_trace = resp.stack_trace;
+      if (resp.timestamp && window.AppUtilsFormatters && typeof window.AppUtilsFormatters.normalizeTimestampToIso === 'function') {
+        item.timestamp = window.AppUtilsFormatters.normalizeTimestampToIso(resp.timestamp) || item.timestamp;
+      }
       if (resp.logs != null && String(resp.logs).trim()) return String(resp.logs);
       throw new Error('No logs available for this action.');
     });
@@ -2691,13 +2951,21 @@ function fetchFailedActionLogs(item){
 
 function renderFailedActions(){
   if (isModularDashboardEnabled() && window.AppFailedActionsPanel && typeof window.AppFailedActionsPanel.renderFailedActionsPanel === 'function') {
-    return window.AppFailedActionsPanel.renderFailedActionsPanel({
+    window.AppFailedActionsPanel.renderFailedActionsPanel({
       failedActions: FAILED_ACTIONS,
       failedActionLogsAvailable: failedActionLogsAvailable,
       escapeHtml: escapeHtml,
       openShotModal: openShotModal,
-      openLogsModal: openLogsModal
+      openLogsModal: openLogsModal,
+      classifyFailure: function(logs, reason){
+        if (window.AppMonitoringMetrics && typeof window.AppMonitoringMetrics.classifyFailure === 'function') {
+          return window.AppMonitoringMetrics.classifyFailure(logs, reason);
+        }
+        return { code: 'OTHER', severity: 'minor', label: 'Other' };
+      }
     });
+    refreshDashboardMonitoring();
+    return;
   }
   var mount = document.getElementById('failed-actions-list');
   if (!mount) return;
@@ -2708,9 +2976,15 @@ function renderFailedActions(){
     var shotTitle = hasShot ? 'View screenshot captured at failure' : 'No screenshot available';
     var logsOk = failedActionLogsAvailable(item);
     var logsTitle = logsOk ? 'Open execution logs in a modal' : 'No logs available';
-    return '<div class="failed-item">' +
+    var fm = classifyFailureForItem(item);
+    var rowSev = fm.severity === 'critical' ? 'failed-item--sev-critical' : (fm.severity === 'warning' ? 'failed-item--sev-warning' : 'failed-item--sev-minor');
+    var em = fm.severity === 'critical' ? '🔴' : (fm.severity === 'warning' ? '🟡' : '⚪');
+    var ftClass = fm.severity === 'critical' ? 'critical' : (fm.severity === 'warning' ? 'warning' : 'minor');
+    return '<div class="failed-item ' + rowSev + '">' +
       '<div class="failed-item-main">' +
       '<div class="failed-lead">' + escapeHtml(item.lead) + '</div>' +
+      '<div class="failed-failure-type"><span class="ft-pill ft-pill--' + ftClass + '" title="Failure type">' +
+      escapeHtml(em) + ' <span class="ft-label">Failure type:</span> ' + escapeHtml(fm.type) + '</span></div>' +
       '<div class="failed-reason">' + escapeHtml(item.reason) + '</div>' +
       '<div class="failed-time">' + escapeHtml(item.timestamp) + '</div></div>' +
       '<div class="failed-item-actions">' +
@@ -2732,6 +3006,7 @@ function renderFailedActions(){
       openLogsModal(parseInt(btn.getAttribute('data-logs-idx'), 10));
     });
   });
+  refreshDashboardMonitoring();
 }
 
 function applyLogsModalSearch(){
@@ -2766,6 +3041,11 @@ function openLogsModal(i){
   document.getElementById('logs-modal-title').textContent = item.lead;
   document.getElementById('logs-modal-reason').textContent = item.reason;
   document.getElementById('logs-modal-time').textContent = item.timestamp;
+  var structEl = document.getElementById('logs-modal-structured');
+  if (structEl) {
+    structEl.hidden = true;
+    structEl.textContent = '';
+  }
   if (searchEl) searchEl.value = '';
   currentLogsFullText = '';
   currentLogsDisplaySlice = '';
@@ -2779,6 +3059,15 @@ function openLogsModal(i){
   modal.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
   fetchFailedActionLogs(item).then(function(text){
+    if (structEl) {
+      var bits = [];
+      if (item.failure_type) bits.push('Type: ' + item.failure_type);
+      if (item.script_name) bits.push('Script: ' + item.script_name);
+      if (bits.length) {
+        structEl.textContent = bits.join(' · ');
+        structEl.hidden = false;
+      }
+    }
     currentLogsFullText = text;
     if (text.length > LOG_MODAL_MAX_CHARS) {
       currentLogsDisplaySlice = text.slice(0, LOG_MODAL_MAX_CHARS);
@@ -2822,6 +3111,11 @@ function closeLogsModal(){
   if (note) { note.hidden = true; note.textContent = ''; }
   var searchEl = document.getElementById('logs-modal-search');
   if (searchEl) searchEl.value = '';
+  var structEl = document.getElementById('logs-modal-structured');
+  if (structEl) {
+    structEl.hidden = true;
+    structEl.textContent = '';
+  }
 }
 
 function openShotModal(i){
@@ -2974,13 +3268,16 @@ function bootChartsAndFailed(){
     window.AppChartService.initChart({
       ChartCtor: (typeof Chart === 'undefined' ? undefined : Chart),
       getChartInstance: function(){ return activityChartInstance; },
-      setChartInstance: function(instance){ activityChartInstance = instance; }
+      setChartInstance: function(instance){ activityChartInstance = instance; },
+      getOverviewChartPayload: function(){ return typeof __overviewChartPayload !== 'undefined' ? __overviewChartPayload : null; }
     });
   } else {
     initActivityChart();
   }
   renderFailedActions();
   initDashboardRunTracking();
+  refreshDashboardMonitoring();
+  refreshSessionNetworkPanel();
 }
 
 if (window.AppLegacyBridge && typeof window.AppLegacyBridge.install === 'function') {

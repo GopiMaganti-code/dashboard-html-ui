@@ -41,6 +41,13 @@ function modeSuite(modeName, path) {
       await expect(page.locator('#failed-actions-list [data-logs-idx]')).toHaveCount(4);
     });
 
+    test('Session & Network panel renders and shows IP monitoring placeholder when API off', async ({ page }) => {
+      const sn = page.locator('#session-network-panel');
+      await expect(sn).toBeVisible();
+      await expect(sn.locator('.session-network-title')).toHaveText('Session & Network');
+      await expect(sn).toContainText('IP monitoring not enabled');
+    });
+
     test('dashboard stat opens detail and back returns dashboard', async ({ page }) => {
       await openDetailFromFirstStat(page);
       await page.locator('#screen-detail .back-btn').first().click();
@@ -104,12 +111,13 @@ function modeSuite(modeName, path) {
       await openMessaging(page);
       await expect(page.locator('#msg-conv-list .msg-conv').first()).toBeVisible();
       await page.locator('#msg-conv-list .msg-conv').nth(1).click();
-      const before = await page.locator('#msg-thread .msg-bubble').count();
-      await page.fill('#msg-input', `Messaging message ${Date.now()}`);
+      const msgText = `Messaging message ${Date.now()}`;
+      await page.fill('#msg-input', msgText);
       await page.click('#msg-send-btn');
       await expect(page.locator('#msg-input')).toHaveValue('');
-      const after = await page.locator('#msg-thread .msg-bubble').count();
-      expect(after).toBe(before + 1);
+      await expect(page.locator('#msg-thread .msg-bubble').filter({ hasText: msgText })).toBeVisible({
+        timeout: 15000,
+      });
       await page.locator('#screen-messages .back-btn').first().click();
       await expect(page.locator('#screen-dashboard')).toHaveClass(/active/);
     });

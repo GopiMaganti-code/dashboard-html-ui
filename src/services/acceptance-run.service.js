@@ -24,6 +24,7 @@
           status: acceptedRows.length > 0 ? 'success' : 'failed',
           started_at: startedAt,
           completed_at: nowIso(),
+          actions_count: rows.length,
           accepted_count: acceptedRows.length,
           accepted_profiles: acceptedRows.map(function(r){
             return {

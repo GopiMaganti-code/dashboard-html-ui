@@ -62,12 +62,42 @@
     return global.AppApiClient.get(baseUrl() + '/failed-actions/' + encodeURIComponent(id), {});
   }
 
+  function postRun(body){
+    return global.AppApiClient.post(baseUrl() + '/runs', body || {});
+  }
+
+  function getRuns(params){
+    return global.AppApiClient.get(baseUrl() + '/runs', params || {});
+  }
+
+  /**
+   * Session & network telemetry (LinkedIn automation monitoring).
+   * GET /api/v1/session-info?campaign_id=...
+   *
+   * Expected JSON (all fields optional; frontend normalizes snake_case and camelCase):
+   * {
+   *   connection_ip, current_ip, previous_ip, ip_changed,
+   *   connection_at | first_connection_at | initial_login_at,
+   *   location: { city, country },
+   *   connection_location: { city, country },
+   *   country_changed,
+   *   isp_type | asn_type,
+   *   ip_history: [{ at, ip, city, country, isp_type }]
+   * }
+   */
+  function getSessionInfo(params){
+    return global.AppApiClient.get(baseUrl() + '/session-info', params || {});
+  }
+
   global.AppApiIntegration = {
     getCampaigns: safe(getCampaigns),
     getOverview: safe(getOverview),
     getDetail: safe(getDetail),
     getConversations: safe(getConversations),
     sendMessage: safe(sendMessage),
-    getFailedActionDetail: safe(getFailedActionDetail)
+    getFailedActionDetail: safe(getFailedActionDetail),
+    postRun: safe(postRun),
+    getRuns: safe(getRuns),
+    getSessionInfo: safe(getSessionInfo)
   };
 })(window);

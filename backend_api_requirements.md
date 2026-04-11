@@ -1,6 +1,21 @@
 # Backend API Requirements
 ## LinkedIn Campaign Automation Monitoring System
 
+### Contract additions — monitoring (IP / session + intelligence)
+
+The following are **additive** to `/api/v1` (backward compatible unless noted):
+
+| Addition | Where documented |
+|---|---|
+| **NEW** `GET /api/v1/session-info` — session identity, IP history, ISP, risk context | §4.12 |
+| **EXTENDED** `GET /api/v1/overview` — optional `monitoring` block (health, failures, alerts) | §4.2 |
+| **EXTENDED** `GET /api/v1/failed-actions/{id}` — structured failure classification fields | §4.3 |
+| **EXTENDED** `GET /api/v1/runs` — optional per-item `metrics` for dashboard rollups | §4.11 |
+| **NEW** shared models: `SessionInfo`, `IpHistoryEntry`, `MonitoringSummary`, `Alert` | §5 |
+| **EXTENDED** security rules for IP/session data | §10.1, §10.3 |
+
+---
+
 ## 1) Application Overview
 
 This application is a **LinkedIn Campaign Automation Monitoring System**.
@@ -14,6 +29,8 @@ It tracks:
 - Acceptance Run Tracking
 - Messages Run Tracking
 - Recent Runs execution history
+- **Session & network telemetry** (connection vs current IP, geo, ISP/ASN class, IP history, cookie age) for LinkedIn account safety
+- **Monitoring intelligence** (automation health, failure summaries, actionable alerts) derived from stats and failure logs
 
 Primary product goal:
 
@@ -38,6 +55,8 @@ The frontend is already modularized and expects stable API contracts with low en
 - Acceptance Run Tracking (trigger + status + accepted profiles + reference node)
 - Messages Run Tracking (trigger + status + replies summary)
 - Recent Runs system (cross-run execution history in dashboard)
+- **IP & session monitoring** (`session-info`): connection vs session IP, change detection, geo, ISP/ASN type, session history, risk signals
+- **Enhanced monitoring** (via `overview.monitoring`): health score, breakdown, top failure summary, alert list for dashboard intelligence
 
 ---
 
@@ -46,8 +65,9 @@ The frontend is already modularized and expects stable API contracts with low en
 | API | Method | Description |
 |---|---|---|
 | `/api/v1/campaigns` | GET | List campaigns for setup and campaign selection |
-| `/api/v1/overview` | GET | Dashboard payload: stats + chart + recent runs + failed action summary |
-| `/api/v1/failed-actions/{id}` | GET | Fetch failed action details (logs/screenshot) |
+| `/api/v1/overview` | GET | Dashboard payload: stats + chart + recent runs + failed action summary; **optional `monitoring`** (health, alerts, failure intelligence) |
+| `/api/v1/session-info` | GET | **Session & network telemetry**: IPs, geo, ISP, history, risk context (campaign-scoped) |
+| `/api/v1/failed-actions/{id}` | GET | Fetch failed action details (logs/screenshot); **optional structured `failure_*` fields** |
 | `/api/v1/details/{metric_key}` | GET | Metric-specific detail table payload |
 | `/api/v1/conversations` | GET | Conversation list + thread data |
 | `/api/v1/conversations/{id}/messages` | POST | Send message in a conversation |
@@ -55,7 +75,7 @@ The frontend is already modularized and expects stable API contracts with low en
 | `/api/v1/acceptance-run/{campaign_id}` | GET | Get latest acceptance run status for campaign |
 | `/api/v1/messages-run` | POST | Trigger messages run job |
 | `/api/v1/messages-run/{campaign_id}` | GET | Get latest messages run status for campaign |
-| `/api/v1/runs` | GET | Run history for dashboard recent runs |
+| `/api/v1/runs` | GET | Run history for dashboard recent runs; **optional `metrics` per item** |
 | `/api/v1/health` | GET | Service health/readiness check |
 
 ---
@@ -300,9 +320,38 @@ Must include: **stats + chart + recent runs + failed actions summary**
       "has_logs": true,
       "has_screenshot": true
     }
-  ]
+  ],
+  "monitoring": {
+    "health_score": 72,
+    "status": "warning",
+    "breakdown": {
+      "acceptance": 28,
+      "reply": 12,
+      "reliability": 32
+    },
+    "failure_summary": {
+      "top_failure": "SELECTOR",
+      "percentage": 45
+    },
+    "alerts": [
+      {
+        "type": "LOW_ACCEPTANCE",
+        "severity": "warning",
+        "message": "Acceptance rate is 12% — likely poor targeting",
+        "created_at": "2026-06-04T18:22:00Z"
+      }
+    ]
+  }
 }
 ```
+
+**`monitoring` (optional, backward compatible):** When present, supplies dashboard intelligence derived from existing stats, run outcomes, and failure logs. Clients that do not consume it must continue to work unchanged.
+
+- `health_score`: `0–100` composite score (product-defined weights).
+- `status`: high-level rollup for UI: `healthy | warning | critical | unknown` (exact enum should be documented in OpenAPI).
+- `breakdown`: component scores (same scale as health or points; must be consistent per release).
+- `failure_summary`: dominant failure code in the current window + share (`percentage` is `0–100`).
+- `alerts`: ordered list of `Alert` objects (see §5). Types may include `LOW_ACCEPTANCE`, `HIGH_FAILURE`, `ZERO_ACTIVITY`, `IP_CHANGE`, etc.
 
 `ai_sdr` is the preferred source for dashboard header rendering.
 
@@ -329,9 +378,22 @@ Must include: **stats + chart + recent runs + failed actions summary**
   "step": "connection_run",
   "timestamp": "2026-06-04T18:22:00Z",
   "logs": "[2026-06-04T12:52:07.771Z] ERROR action blocked: CONNECTION_LIMIT_REACHED",
-  "screenshot_url": "https://cdn.example.com/fa_001.png"
+  "screenshot_url": "https://cdn.example.com/fa_001.png",
+  "failure_type": "SELECTOR",
+  "failure_severity": "medium",
+  "script_name": "connection_run",
+  "stack_trace": "Error: selector not found\n  at stepOpenProfile (/app/steps/profile.js:42:10)"
 }
 ```
+
+**Structured failure fields (optional, backward compatible):**
+
+- `failure_type`: normalized enum — `SELECTOR` | `TIMEOUT` | `RATE_LIMIT` | `AUTH` | `NAVIGATION` | `OTHER` (extend in OpenAPI; map internal codes in adapters).
+- `failure_severity`: `low` | `medium` | `high` | `critical` (or product-defined subset).
+- `script_name`: automation script / step runner name (aligns with `step` where applicable).
+- `stack_trace`: sanitized stack or error chain; must not leak secrets (see §10.3).
+
+When omitted, clients fall back to parsing `logs` / `reason` (current UI behavior).
 
 ---
 
@@ -616,7 +678,13 @@ Purpose: unified run list for dashboard recent runs and auditing.
       "status": "success",
       "started_at": "2026-06-04T18:50:00Z",
       "completed_at": "2026-06-04T18:50:42Z",
-      "summary": "3 accepted profiles"
+      "summary": "3 accepted profiles",
+      "metrics": {
+        "processed": 25,
+        "success": 18,
+        "failed": 7,
+        "success_rate": 72
+      }
     },
     {
       "run_id": "run_msg_001",
@@ -634,9 +702,78 @@ Purpose: unified run list for dashboard recent runs and auditing.
 }
 ```
 
+**`metrics` (optional per item, backward compatible):** When present, supports dashboard “run health” rollups without re-parsing `summary`. `success_rate` is `0–100`. Omitted items may be rendered from legacy fields only.
+
 ---
 
-### 4.12 Health Check
+### 4.12 Session & Network Info (IP / session telemetry)
+`GET /api/v1/session-info`
+
+Purpose: expose **current session identity**, **connection vs session IP**, **geo**, **ISP/ASN classification**, **IP change detection**, **session history**, and **cookie age** for LinkedIn automation safety. IP change and risk signals should be **computed server-side** from authoritative telemetry.
+
+#### Query Params
+- `campaign_id` (**required**): scopes session context to the campaign / AI SDR account under automation.
+
+#### Response
+```json
+{
+  "campaign_id": "CMP-001",
+  "connection": {
+    "ip": "49.37.112.10",
+    "connected_at": "2026-04-01T10:00:00Z"
+  },
+  "current_session": {
+    "ip": "49.37.115.22",
+    "last_seen_at": "2026-04-11T12:30:00Z"
+  },
+  "ip_changed": true,
+  "location": {
+    "city": "Hyderabad",
+    "country": "India"
+  },
+  "isp": {
+    "asn": "AS12345",
+    "type": "residential"
+  },
+  "session_cookie_age_days": 3,
+  "ip_history": [
+    {
+      "ip": "49.37.112.10",
+      "timestamp": "2026-04-01T10:00:00Z",
+      "location": {
+        "city": "Hyderabad",
+        "country": "India"
+      },
+      "isp_type": "residential"
+    }
+  ]
+}
+```
+
+#### Semantics & rules
+
+- **`connection`**: first / stable login IP and when that association was recorded (initial session establishment).
+- **`current_session`**: IP observed for the active browser/session used by automation; `last_seen_at` is last heartbeat or successful session check.
+- **`ip_changed`**: `true` when current session IP differs from connection IP (or from last persisted session IP per product rules). Must be **computed on the server**, not inferred solely by the client.
+- **`location`**: geo for the **current** session (or primary display location); precision per privacy policy.
+- **`isp.type`**: classify as `residential` or `datacenter` (and optionally `hosting`, `mobile`, `unknown` in OpenAPI); align with threat model for LinkedIn detection risk.
+- **`isp.asn`**: opaque ASN identifier string; do not expose internal infra maps (see §10.3).
+- **`session_cookie_age_days`**: optional freshness signal for session validity.
+- **`ip_history`**: multiple entries allowed; **most recent first** recommended; cap list length server-side (e.g. last **10**). Each row is an `IpHistoryEntry` (see §5).
+
+#### Backward-compatible flat fields (optional)
+
+Existing UI adapters may also accept equivalent **flat** `snake_case` keys in the same response or via a versioned profile: `connection_ip`, `current_ip`, `connection_at`, `previous_ip`, `country_changed`, `isp_type`, `ip_history` with `at`/`timestamp` per row. Prefer the **nested** shape above for new implementations; document aliases in OpenAPI.
+
+#### Errors
+
+- `400` if `campaign_id` missing or invalid
+- `403` if caller cannot access campaign / org
+- `404` if no session telemetry exists yet (optional: return empty structured object per OpenAPI)
+
+---
+
+### 4.13 Health Check
 `GET /api/v1/health`
 
 Purpose: lightweight liveness/readiness endpoint for platform monitoring, deployment checks, and alerting.
@@ -684,7 +821,40 @@ Purpose: lightweight liveness/readiness endpoint for platform monitoring, deploy
   "stats": "Stat[]",
   "chart": "ChartPayload",
   "recent_runs_summary": "RunSummary[]",
-  "failed_actions_summary": "FailedActionSummary[]"
+  "failed_actions_summary": "FailedActionSummary[]",
+  "monitoring": "MonitoringSummary|null"
+}
+```
+
+### MonitoringSummary
+Aggregated dashboard intelligence (optional on `GET /api/v1/overview`).
+
+```json
+{
+  "health_score": "number",
+  "status": "healthy|warning|critical|unknown",
+  "breakdown": {
+    "acceptance": "number",
+    "reply": "number",
+    "reliability": "number"
+  },
+  "failure_summary": {
+    "top_failure": "string",
+    "percentage": "number"
+  },
+  "alerts": "Alert[]"
+}
+```
+
+### Alert
+Used in `overview.monitoring.alerts` and may be reused by notifications/streaming later.
+
+```json
+{
+  "type": "LOW_ACCEPTANCE|HIGH_FAILURE|ZERO_ACTIVITY|IP_CHANGE|string",
+  "severity": "info|warning|critical",
+  "message": "string",
+  "created_at": "ISO-8601 datetime"
 }
 ```
 
@@ -698,7 +868,11 @@ Purpose: lightweight liveness/readiness endpoint for platform monitoring, deploy
   "step": "string",
   "timestamp": "ISO-8601 datetime",
   "logs": "string",
-  "screenshot_url": "string"
+  "screenshot_url": "string",
+  "failure_type": "SELECTOR|TIMEOUT|RATE_LIMIT|AUTH|NAVIGATION|OTHER",
+  "failure_severity": "low|medium|high|critical",
+  "script_name": "string",
+  "stack_trace": "string"
 }
 ```
 
@@ -793,7 +967,41 @@ Purpose: lightweight liveness/readiness endpoint for platform monitoring, deploy
   "status": "queued|running|success|failed",
   "started_at": "ISO-8601 datetime",
   "completed_at": "ISO-8601 datetime|null",
-  "summary": "string"
+  "summary": "string",
+  "metrics": {
+    "processed": "number",
+    "success": "number",
+    "failed": "number",
+    "success_rate": "number"
+  }
+}
+```
+
+`metrics` is optional; when absent, UIs rely on `summary` and related APIs.
+
+### SessionInfo
+Canonical shape for `GET /api/v1/session-info` (see §4.12). Nested objects may be flattened in adapters.
+
+```json
+{
+  "campaign_id": "string",
+  "connection": { "ip": "string", "connected_at": "ISO-8601 datetime" },
+  "current_session": { "ip": "string", "last_seen_at": "ISO-8601 datetime" },
+  "ip_changed": "boolean",
+  "location": { "city": "string", "country": "string" },
+  "isp": { "asn": "string", "type": "residential|datacenter|..." },
+  "session_cookie_age_days": "number|null",
+  "ip_history": "IpHistoryEntry[]"
+}
+```
+
+### IpHistoryEntry
+```json
+{
+  "ip": "string",
+  "timestamp": "ISO-8601 datetime",
+  "location": { "city": "string", "country": "string" },
+  "isp_type": "residential|datacenter|..."
 }
 ```
 
@@ -804,6 +1012,7 @@ Purpose: lightweight liveness/readiness endpoint for platform monitoring, deploy
 - Campaign -> Failed Actions (1:N)
 - Campaign -> Conversations (1:N)
 - Campaign -> Overview Stats (1:1 per time window)
+- Campaign -> **Session / IP telemetry** (1:1 or 1:N per account/session store; exposed as `session-info` for dashboard)
 - Campaign -> Acceptance Runs (1:N)
 - Campaign -> Messages Runs (1:N)
 - Campaign -> Run History records (1:N; union of acceptance/messages)
@@ -861,6 +1070,7 @@ Lifecycle constraints:
 - Do not block request thread for automation tasks
 - Use polling for run status (2-5s interval)
 - Cache `/overview` (short TTL, e.g., 15-30s)
+- Cache `/session-info` with a **short TTL** (e.g., 15-60s) or ETag; must not serve stale IP risk state beyond product tolerance
 - Paginate campaigns, details, conversations, runs
 - Keep failed-action logs lazy-loaded via details endpoint
 - Add idempotency key for run trigger APIs if repeated clicks are possible
@@ -943,6 +1153,7 @@ Event types:
 - `run.status.changed`
 - `failed_action.created`
 - `conversation.updated`
+- `session.telemetry.updated` (optional; IP / session risk or cookie age changes)
 
 Payload shape should include:
 
@@ -970,6 +1181,8 @@ If not enabled, polling remains supported and canonical.
 | Acceptance Runs Section | `POST /api/v1/acceptance-run`, `GET /api/v1/acceptance-run/{campaign_id}` |
 | Messages Runs Section | `POST /api/v1/messages-run`, `GET /api/v1/messages-run/{campaign_id}` |
 | Unified Run History | `GET /api/v1/runs` |
+| **Session & Network panel** (IP, geo, ISP, history, risk) | `GET /api/v1/session-info` |
+| **Monitoring dashboard** (health, alerts, failure intelligence when enabled) | `GET /api/v1/overview` (`monitoring` block) |
 
 ---
 
@@ -1016,12 +1229,14 @@ If not enabled, polling remains supported and canonical.
 - Sanitize and encode untrusted text before storing/returning
 - Reject unknown enum values for `status`, `type`, `metric_key`, `environment`
 - Enforce campaign-level ACL checks for every endpoint using `campaign_id`
-- Never expose secrets, cookies, auth headers, or internal stack traces in API responses
+- Enforce **org + campaign** scoping for **`GET /session-info`** (same as other campaign APIs); never return another tenant’s session/IP data
+- Never expose secrets, cookies, auth headers, or raw internal stack traces in API responses
 - Store logs/screenshot URLs securely (signed URLs where applicable)
 - Apply audit logging for:
   - run trigger requests
   - failed_action creation
   - message send operations
+  - **session / IP telemetry reads** (optional, for compliance-heavy deployments)
 
 ---
 
@@ -1049,19 +1264,29 @@ Backward compatibility guidance:
 
 ---
 
+## 10.3 IP & session telemetry (security & validation)
+
+- **No sensitive infra disclosure**: responses must not expose internal hostnames, cloud instance IDs, private IPs, or full proxy chains unless explicitly product-approved.
+- **IP format**: validate IPv4/IPv6 strings when persisting or returning; reject malformed values with `400`.
+- **Geo/ISP**: treat as **non-authoritative** signals; document accuracy limits; avoid precise lat/long in API unless required.
+- **`stack_trace` / logs** on failed actions: strip tokens, cookies, and PII before persistence and before API response; prefer structured `failure_type` over raw dumps for clients.
+- **Access control**: `campaign_id` + `org_id` from token must match the stored telemetry row; rate-limit `GET /session-info` similarly to other read-heavy dashboard endpoints if needed.
+
+---
+
 ## 11) Future Scope
 
-- Severity system for failed actions (`critical/warning/info`)
 - AI-powered issue summaries and remediation suggestions
 - Retry failed run action (`POST /runs/{id}/retry`)
 - Real-time notifications (websocket/email/slack)
-- Campaign health score endpoint and trend APIs
+- Dedicated health **trend** time-series API (if `overview.monitoring` is not sufficient)
+- Streaming `session.telemetry.updated` events (see §8.4) for live IP risk banners
 
 ---
 
 ## Implementation Notes (Minimal + Scalable)
 
-- Keep endpoint count as defined above (minimal set for current UI)
+- Keep endpoint count small: **add `session-info`** to the minimal set; prefer extending **`overview`** over new monitoring-only endpoints where possible
 - Reuse shared run model base internally (`run_id`, `campaign_id`, `status`, timing)
 - Ensure naming consistency (`snake_case` in API payloads)
 - Add OpenAPI spec from these contracts before implementation start

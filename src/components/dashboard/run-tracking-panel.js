@@ -15,6 +15,17 @@
     return '<span class="run-badge">—</span>';
   }
 
+  function formatRunTs(raw){
+    if (!raw) return '—';
+    if (global.AppUtilsFormatters && typeof global.AppUtilsFormatters.normalizeTimestampToIso === 'function') {
+      var iso = global.AppUtilsFormatters.normalizeTimestampToIso(raw);
+      if (iso && global.AppUtilsFormatters.formatIsoForDisplay) {
+        return global.AppUtilsFormatters.formatIsoForDisplay(iso);
+      }
+    }
+    return String(raw);
+  }
+
   function kv(label, value, mono){
     return '<div class="run-kv"><span>' + esc(label) + '</span><strong' + (mono ? ' class="mono"' : '') + '>' + esc(value || '—') + '</strong></div>';
   }
@@ -43,7 +54,7 @@
       '<button type="button" class="btn run-action-btn" id="dashboard-acceptance-run-btn"' + (acceptanceRunning ? ' disabled' : '') + '>' + (acceptanceRunning ? 'Running…' : 'Run Acceptance Check') + '</button></div>' +
       '<div class="run-summary-grid">' +
       kv('Status', '', false).replace('</strong>', badge(acceptanceRun && acceptanceRun.status, acceptanceRunning) + '</strong>') +
-      kv('Last run', acceptanceRun && acceptanceRun.completed_at || '—') +
+      kv('Last run', acceptanceRun ? formatRunTs(acceptanceRun.completed_at || acceptanceRun.started_at) : '—') +
       kv('Accepted count', acceptanceRun && String(acceptanceRun.accepted_count) || '0') +
       kv('Reference node', acceptanceRun && acceptanceRun.new_reference_node || '—', true) +
       '</div>';
@@ -53,7 +64,7 @@
       '<button type="button" class="btn run-action-btn" id="dashboard-messages-run-btn"' + (messagesRunning ? ' disabled' : '') + '>' + (messagesRunning ? 'Running…' : 'Run Messages Check') + '</button></div>' +
       '<div class="run-summary-grid">' +
       kv('Status', '', false).replace('</strong>', badge(messagesRun && messagesRun.status, messagesRunning) + '</strong>') +
-      kv('Last run', messagesRun && messagesRun.completed_at || '—') +
+      kv('Last run', messagesRun ? formatRunTs(messagesRun.completed_at || messagesRun.started_at) : '—') +
       kv('Leads processed', messagesRun && String(messagesRun.leads_processed) || '0') +
       kv('Replies detected', messagesRun && String(messagesRun.replies_detected) || '0') +
       kv('Failed count', messagesRun && String(messagesRun.failed_count) || '0') +
