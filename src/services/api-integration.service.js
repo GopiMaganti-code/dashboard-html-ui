@@ -42,6 +42,153 @@
     return global.AppApiClient.get(baseUrl() + '/campaigns', params || {});
   }
 
+  /**
+   * Campaign setup APIs.
+   * Unified endpoint:
+   * - Empty email: POST /orch/campaign/list?env=...
+   * - With email:  POST /orch/campaign/list?env=...  (email in body)
+   * Environment is sent as query `env` and header `X-Environment`.
+   */
+  function normalizeCampaignListStatus(st){
+    var allowed = { all: 1, paused: 1, completed: 1, closed: 1, active: 1 };
+    var k = String(st || '').trim().toLowerCase();
+    return allowed[k] ? k : 'all';
+  }
+
+  function getSetupCampaigns(params){
+    var p = params || {};
+    var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var status = normalizeCampaignListStatus(p.status);
+    var path = '/orch/campaign/list';
+    var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
+    var url = path + qs;
+    var payload = {
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : '',
+      status: status,
+      limit: 200
+    };
+    if (email) payload.email = email;
+    var headers = env ? { 'X-Environment': env } : {};
+    if (global.AppConfig && global.AppConfig.useApi && typeof console !== 'undefined' && typeof console.log === 'function') {
+      var urlForLog = (global.AppApiClient && typeof global.AppApiClient.resolveUrl === 'function')
+        ? global.AppApiClient.resolveUrl(url, env)
+        : url;
+      console.log('[API] Fetching campaigns:', { email: email, env: env, status: status, url: urlForLog, method: 'POST' });
+    }
+    return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
+  }
+
+  function normalizeLeadsCampaignStatus(st){
+    var allowed = { all: 1, paused: 1, completed: 1, closed: 1, active: 1 };
+    var k = String(st || '').trim().toLowerCase();
+    return allowed[k] ? k : 'all';
+  }
+
+  /**
+   * Leads listing for setup leads tab (paginated).
+   * POST /orch/campaign/leads-all
+   */
+  function getCampaignLeadsAll(params){
+    var p = params || {};
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var status = normalizeLeadsCampaignStatus(p.campaign_status);
+    var runStatus = typeof p.run_status === 'string' ? String(p.run_status).trim().toLowerCase() : '';
+    if (runStatus !== 'pending' && runStatus !== 'waiting' && runStatus !== 'connected') runStatus = '';
+    var search = typeof p.search === 'string' ? p.search.trim() : '';
+    var limit = Number.isFinite(p.limit) ? Math.max(1, Math.min(200, Math.floor(p.limit))) : 50;
+    var offset = Number.isFinite(p.offset) ? Math.max(0, Math.floor(p.offset)) : 0;
+    var path = '/orch/campaign/leads-all';
+    var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
+    var url = path + qs;
+    var payload = {
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : '',
+      campaign_status: status,
+      limit: limit,
+      offset: offset
+    };
+    if (runStatus) payload.run_status = runStatus;
+    if (search) payload.search = search;
+    var headers = env ? { 'X-Environment': env } : {};
+    if (global.AppConfig && global.AppConfig.useApi && typeof console !== 'undefined' && typeof console.log === 'function') {
+      var urlForLog = (global.AppApiClient && typeof global.AppApiClient.resolveUrl === 'function')
+        ? global.AppApiClient.resolveUrl(url, env)
+        : url;
+      console.log('[API] Fetching leads-all:', {
+        env: env,
+        campaign_status: status,
+        run_status: runStatus || '(none)',
+        search: search || '(none)',
+        limit: limit,
+        offset: offset,
+        url: urlForLog,
+        method: 'POST'
+      });
+    }
+    return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
+  }
+
+  /**
+   * Campaign detail metrics for dashboard top cards.
+   * POST /orch/campaign/detail?env=...
+   */
+  function getCampaignDetail(params){
+    var p = params || {};
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var campaignId = p.campaign_id != null ? String(p.campaign_id).trim() : '';
+    var path = '/orch/campaign/detail';
+    var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
+    var url = path + qs;
+    var payload = {
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : '',
+      campaign_id: campaignId
+    };
+    if (email) payload.email = email;
+    var headers = env ? { 'X-Environment': env } : {};
+    return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
+  }
+
+  /**
+   * Profile health monitoring summary for dashboard health section.
+   * POST /orch/profile-health?env=...
+   */
+  function getProfileHealth(params){
+    var p = params || {};
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var path = '/orch/profile-health';
+    var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
+    var url = path + qs;
+    var payload = {
+      email: email,
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : '',
+      probe_live_session: false,
+      include_action_breakdown: true
+    };
+    var headers = env ? { 'X-Environment': env } : {};
+    return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
+  }
+
+  /**
+   * Failed action screenshots DB feed for monitoring panel.
+   * GET /admin/screenshots/db?token=...&limit=...&user_id=...
+   */
+  function getFailedActionsScreenshotsDb(params){
+    var p = params || {};
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var limit = Number.isFinite(p.limit) ? Math.max(1, Math.min(200, Math.floor(p.limit))) : 100;
+    var path = '/admin/screenshots/db';
+    var query = {
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : '',
+      limit: limit,
+      user_id: email
+    };
+    var headers = env ? { 'X-Environment': env } : {};
+    return global.AppApiClient.get(path, query, { headers: headers, environment: env });
+  }
+
   function getOverview(params){
     return global.AppApiClient.get(baseUrl() + '/overview', params || {});
   }
@@ -91,10 +238,15 @@
 
   global.AppApiIntegration = {
     getCampaigns: safe(getCampaigns),
+    getSetupCampaigns: getSetupCampaigns,
     getOverview: safe(getOverview),
     getDetail: safe(getDetail),
     getConversations: safe(getConversations),
     sendMessage: safe(sendMessage),
+    getCampaignLeadsAll: getCampaignLeadsAll,
+    getCampaignDetail: getCampaignDetail,
+    getProfileHealth: getProfileHealth,
+    getFailedActionsScreenshotsDb: getFailedActionsScreenshotsDb,
     getFailedActionDetail: safe(getFailedActionDetail),
     postRun: safe(postRun),
     getRuns: safe(getRuns),

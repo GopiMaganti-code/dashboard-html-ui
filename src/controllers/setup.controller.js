@@ -7,11 +7,8 @@
     var segments = document.querySelectorAll('#env-selector .env-segment');
     if (!email || !btn || !err || !hint) return;
     deps.ensureCampaignsSeed();
-    var session = deps.getAppState();
-    var partial = deps.loadAppStateRaw() || {};
-    email.value = session.aiSdrEmail || partial.aiSdrEmail || '';
-    var envPref = session.environment || partial.environment || '';
-    global.setupSelectedEnv = (envPref && deps.envOptions.indexOf(envPref) >= 0) ? envPref : '';
+    email.value = '';
+    global.setupSelectedEnv = 'Dev';
     segments.forEach(function(seg){
       var on = seg.getAttribute('data-env') === global.setupSelectedEnv;
       seg.classList.toggle('is-selected', on);
@@ -33,6 +30,19 @@
       else if (deps.isValidEmail(v)) { err.textContent = ''; }
       btn.disabled = global.__setupContinueInFlight || !(okEmail && global.setupSelectedEnv);
     }
+    function requestCampaignRefresh(force){
+      if (typeof deps.hydrateCampaignsFromApi !== 'function') return Promise.resolve(false);
+      return deps.hydrateCampaignsFromApi({
+        email: (email.value || '').trim(),
+        environment: global.setupSelectedEnv || '',
+        force: !!force
+      }).then(function(updated){
+        if (updated && readTabState() === 'campaigns') renderCampaignTable();
+        if (updated && readTabState() === 'leads') renderLeadsTable();
+        if (readTabState() === 'aisdrs' && typeof deps.renderAisdrs === 'function') deps.renderAisdrs();
+        return updated;
+      });
+    }
 
     // Step 3A: rendering extraction with legacy fallback.
     function renderCampaignTable(){
@@ -48,16 +58,21 @@
     }
 
     function readTabState(){
-      return global.__setupActiveTab === 'leads' ? 'leads' : 'campaigns';
+      if (global.__setupActiveTab === 'leads') return 'leads';
+      if (global.__setupActiveTab === 'aisdrs') return 'aisdrs';
+      return 'campaigns';
     }
 
     function setSetupTab(tabName){
-      var tab = tabName === 'leads' ? 'leads' : 'campaigns';
+      var tab = (tabName === 'leads' || tabName === 'aisdrs') ? tabName : 'campaigns';
       global.__setupActiveTab = tab;
+      if (typeof deps.syncSetupRouteTab === 'function') deps.syncSetupRouteTab(tab);
       var campaignsBtn = document.getElementById('setup-tab-campaigns');
       var leadsBtn = document.getElementById('setup-tab-leads');
+      var aisdrsBtn = document.getElementById('setup-tab-aisdrs');
       var campaignsPanel = document.getElementById('setup-tabpanel-campaigns');
       var leadsPanel = document.getElementById('setup-tabpanel-leads');
+      var aisdrsPanel = document.getElementById('setup-tabpanel-aisdrs');
       if (campaignsBtn) {
         campaignsBtn.classList.toggle('is-active', tab === 'campaigns');
         campaignsBtn.setAttribute('aria-selected', tab === 'campaigns' ? 'true' : 'false');
@@ -66,22 +81,32 @@
         leadsBtn.classList.toggle('is-active', tab === 'leads');
         leadsBtn.setAttribute('aria-selected', tab === 'leads' ? 'true' : 'false');
       }
+      if (aisdrsBtn) {
+        aisdrsBtn.classList.toggle('is-active', tab === 'aisdrs');
+        aisdrsBtn.setAttribute('aria-selected', tab === 'aisdrs' ? 'true' : 'false');
+      }
       if (campaignsPanel) campaignsPanel.hidden = tab !== 'campaigns';
       if (leadsPanel) leadsPanel.hidden = tab !== 'leads';
+      if (aisdrsPanel) aisdrsPanel.hidden = tab !== 'aisdrs';
       if (tab === 'campaigns') renderCampaignTable();
-      else renderLeadsTable();
+      else if (tab === 'leads') renderLeadsTable();
+      else if (typeof deps.renderAisdrs === 'function') deps.renderAisdrs();
     }
 
     function renderLeadsTable(){
       if (!global.AppLeadsTable || typeof global.AppLeadsTable.renderLeadsTable !== 'function') return Promise.resolve();
-      var status = global.__setupLeadsStatusFilter || 'all';
       var search = global.__campaignSetupSearchQuery || '';
       return deps.getLeadTableData().then(function(payload){
         global.AppLeadsTable.renderLeadsTable({
           campaigns: payload && Array.isArray(payload.campaigns) ? payload.campaigns : [],
           dataMap: payload && payload.dataMap ? payload.dataMap : null,
-          searchQuery: search,
-          statusFilter: status
+          searchQuery: (payload && typeof payload.searchQuery === 'string') ? payload.searchQuery : search,
+          statusFilter: 'all'
+          ,
+          apiLeadsFetcher: payload && typeof payload.apiLeadsFetcher === 'function' ? payload.apiLeadsFetcher : null,
+          environment: payload && payload.environment ? payload.environment : '',
+          runStatusFilter: payload && payload.runStatusFilter ? payload.runStatusFilter : 'queued',
+          runStatusApi: payload && payload.runStatusApi ? payload.runStatusApi : 'pending'
         });
       }).catch(function(){
         if (typeof deps.showGlobalError === 'function') deps.showGlobalError('Failed to load leads from API. Showing fallback data.');
@@ -89,7 +114,11 @@
           campaigns: deps.getCampaignsSorted(),
           dataMap: global.DATA || null,
           searchQuery: search,
-          statusFilter: status
+          statusFilter: 'all',
+          apiLeadsFetcher: null,
+          environment: '',
+          runStatusFilter: 'queued',
+          runStatusApi: 'pending'
         });
       });
     }
@@ -116,8 +145,10 @@
       global.__setupTabsBound = true;
       var campaignsBtn = document.getElementById('setup-tab-campaigns');
       var leadsBtn = document.getElementById('setup-tab-leads');
+      var aisdrsBtn = document.getElementById('setup-tab-aisdrs');
       if (campaignsBtn) campaignsBtn.addEventListener('click', function(){ setSetupTab('campaigns'); });
       if (leadsBtn) leadsBtn.addEventListener('click', function(){ setSetupTab('leads'); });
+      if (aisdrsBtn) aisdrsBtn.addEventListener('click', function(){ setSetupTab('aisdrs'); });
     }
 
     // Step 3C: filter/search binding extraction with legacy fallback.
@@ -127,21 +158,25 @@
         document.querySelectorAll('#campaign-status-filters .campaign-filter-chip').forEach(function(chip){
           chip.addEventListener('click', function(){
             var f = chip.getAttribute('data-filter') || 'all';
-            global.__campaignSetupFilter = f;
-            global.__setupLeadsStatusFilter = String(f || '').toLowerCase();
+            global.__setupLeadsRunStatusFilter = String(f || 'queued').toLowerCase();
             document.querySelectorAll('#campaign-status-filters .campaign-filter-chip').forEach(function(c){
               c.classList.toggle('is-active', c === chip);
             });
             if (readTabState() === 'leads') renderLeadsTable();
+            else if (readTabState() === 'aisdrs' && typeof deps.renderAisdrs === 'function') deps.renderAisdrs();
             else renderCampaignTable();
           });
         });
         var search = document.getElementById('campaign-search-input');
         if (search) {
+          var searchTimer = null;
           search.addEventListener('input', function(){
-            global.__campaignSetupSearchQuery = (search.value || '').trim();
-            if (readTabState() === 'leads') renderLeadsTable();
-            else renderCampaignTable();
+            if (searchTimer) clearTimeout(searchTimer);
+            searchTimer = setTimeout(function(){
+              global.__campaignSetupSearchQuery = (search.value || '').trim();
+              if (readTabState() === 'leads') renderLeadsTable();
+              else renderCampaignTable();
+            }, 400);
           });
         }
       }
@@ -152,12 +187,13 @@
         return global.AppSetupCampaignTable.resetCampaignFilterState();
       }
       global.__campaignSetupFilter = 'all';
+      global.__setupLeadsRunStatusFilter = 'queued';
       global.__campaignSetupSearchQuery = '';
       var searchInput = document.getElementById('campaign-search-input');
       if (searchInput) searchInput.value = '';
       document.querySelectorAll('#campaign-status-filters .campaign-filter-chip').forEach(function(c){
         var f = c.getAttribute('data-filter') || '';
-        c.classList.toggle('is-active', f === 'all');
+        c.classList.toggle('is-active', String(f).toLowerCase() === 'queued');
       });
     }
     if (!global.__setupListenersBound){
@@ -171,13 +207,19 @@
             s.setAttribute('aria-checked', on ? 'true' : 'false');
           });
           updateContinueState();
+          requestCampaignRefresh(false);
         });
       });
+      var emailRefreshTimer = null;
       email.addEventListener('input', function(){
         if ((email.value || '').trim() && !deps.isValidEmail((email.value || '').trim())) {
           err.textContent = 'Enter a valid email address.';
         } else { err.textContent = ''; }
         updateContinueState();
+        if (emailRefreshTimer) clearTimeout(emailRefreshTimer);
+        emailRefreshTimer = setTimeout(function(){
+          requestCampaignRefresh(false);
+        }, 400);
       });
       email.addEventListener('blur', validateEmailField);
       btn.addEventListener('click', function(){
@@ -190,7 +232,7 @@
         var existing = deps.getAppState();
         var nextStatus = 'Active';
         if (existing.campaignStatus === 'Inactive') nextStatus = 'Inactive';
-        setTimeout(function(){
+        requestCampaignRefresh(true).finally(function(){
           deps.saveAppState({
             aiSdrEmail: email.value.trim(),
             environment: global.setupSelectedEnv,
@@ -209,7 +251,7 @@
           btn.classList.remove('is-loading');
           btn.setAttribute('aria-busy', 'false');
           updateContinueState();
-        }, 420);
+        });
       });
     }
     bindFilterAndSearchListeners();
@@ -219,6 +261,7 @@
     bindLeadsTableClicks();
     setSetupTab(readTabState());
     updateContinueState();
+    requestCampaignRefresh(false);
   }
 
   global.AppSetupController = {

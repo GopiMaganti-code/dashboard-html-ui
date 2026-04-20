@@ -27,7 +27,7 @@
     mount.innerHTML = deps.failedActions.map(function(item, i){
       var hasShot = !!(item.screenshot_url && String(item.screenshot_url).trim());
       var shotTitle = hasShot ? 'View screenshot captured at failure' : 'No screenshot available';
-      var logsOk = deps.failedActionLogsAvailable(item);
+      var logsOk = item && item.disable_logs ? false : deps.failedActionLogsAvailable(item);
       var logsTitle = logsOk ? 'Open execution logs in a modal' : 'No logs available';
       var mm = global.AppMonitoringMetrics;
       var cf = classify(item.logs, item.reason);
@@ -36,14 +36,15 @@
         : null;
       var code = (fromApi && fromApi !== 'OTHER') ? fromApi : (cf && cf.code) || 'OTHER';
       var fSev = item.failure_severity || (mm && mm.SEVERITY_BY_CODE && mm.SEVERITY_BY_CODE[code]) || (cf && cf.severity) || 'minor';
-      var fType = mm && typeof mm.getFailureDisplayLabel === 'function'
+      var fType = item && item.failure_type_label ? String(item.failure_type_label) : (mm && typeof mm.getFailureDisplayLabel === 'function'
         ? mm.getFailureDisplayLabel(code)
-        : (cf && (cf.label || cf.type)) || String(code);
+        : (cf && (cf.label || cf.type)) || String(code));
       var rowSev = severityClass(fSev);
       var em = severityEmoji(fSev);
       return '<div class="failed-item ' + rowSev + '">' +
         '<div class="failed-item-main">' +
         '<div class="failed-lead">' + deps.escapeHtml(item.lead) + '</div>' +
+        '<div class="failed-title">' + deps.escapeHtml(item.title || '') + '</div>' +
         '<div class="failed-failure-type"><span class="ft-pill ft-pill--' + deps.escapeHtml(fSev) + '" title="Failure type">' +
         deps.escapeHtml(em) + ' <span class="ft-label">Failure type:</span> ' + deps.escapeHtml(fType) + '</span></div>' +
         '<div class="failed-reason">' + deps.escapeHtml(item.reason) + '</div>' +

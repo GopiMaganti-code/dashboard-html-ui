@@ -1,5 +1,12 @@
 ;(function(global){
-  var DEFAULT_TIMEOUT_MS = 3000;
+  var ENV_CONFIG = {
+    dev: 'https://dev-heyr-api.wyra.ai',
+    qa: 'https://qa-heyr-api.wyra.ai',
+    stage: 'https://stage-heyr-api.wyra.ai',
+    prod: 'https://heyr-v2.wyra.ai'
+  };
+  var DEFAULT_ENV = 'dev';
+  var BASE_URL = ENV_CONFIG[DEFAULT_ENV];
 
   function buildQuery(params){
     if (!params || typeof params !== 'object') return '';
@@ -13,39 +20,43 @@
     return s ? ('?' + s) : '';
   }
 
-  function withTimeout(promise, ms){
-    return new Promise(function(resolve, reject){
-      var done = false;
-      var timer = setTimeout(function(){
-        if (done) return;
-        done = true;
-        reject(new Error('API timeout'));
-      }, ms);
-      promise.then(function(v){
-        if (done) return;
-        done = true;
-        clearTimeout(timer);
-        resolve(v);
-      }).catch(function(err){
-        if (done) return;
-        done = true;
-        clearTimeout(timer);
-        reject(err);
-      });
-    });
+  function trimTrailingSlash(url){
+    return String(url || '').replace(/\/+$/, '');
+  }
+
+  function resolveBaseUrl(env){
+    if (global.AppConfig && typeof global.AppConfig.resolveApiOrigin === 'function') {
+      var resolved = global.AppConfig.resolveApiOrigin(env);
+      if (resolved) return trimTrailingSlash(resolved);
+    }
+    if (global.AppConfig && typeof global.AppConfig.apiOrigin === 'string' && global.AppConfig.apiOrigin.trim()) {
+      return trimTrailingSlash(global.AppConfig.apiOrigin);
+    }
+    if (global.AppConfig && typeof global.AppConfig.apiHost === 'string' && global.AppConfig.apiHost.trim()) {
+      return trimTrailingSlash(global.AppConfig.apiHost);
+    }
+    return trimTrailingSlash(BASE_URL);
+  }
+
+  function resolveUrl(path, env){
+    var p = String(path || '');
+    if (/^https?:\/\//i.test(p)) return p;
+    if (!p) return resolveBaseUrl(env);
+    if (p.charAt(0) !== '/') p = '/' + p;
+    return resolveBaseUrl(env) + p;
   }
 
   function request(method, path, body, options){
     var opts = options || {};
-    var timeoutMs = typeof opts.timeoutMs === 'number' ? opts.timeoutMs : DEFAULT_TIMEOUT_MS;
     var headers = Object.assign({ 'Accept': 'application/json' }, opts.headers || {});
     var init = { method: method, headers: headers };
     if (body != null) {
       headers['Content-Type'] = 'application/json';
       init.body = JSON.stringify(body);
     }
-    return withTimeout(fetch(path, init), timeoutMs).then(function(res){
-      if (!res.ok) throw new Error('API ' + res.status + ' for ' + path);
+    var url = resolveUrl(path, opts.environment);
+    return fetch(url, init).then(function(res){
+      if (!res.ok) throw new Error('API Error: ' + res.status);
       return res.json();
     });
   }
@@ -60,6 +71,9 @@
 
   global.AppApiClient = {
     get: get,
-    post: post
+    post: post,
+    resolveUrl: resolveUrl,
+    getBaseUrl: resolveBaseUrl,
+    ENV_CONFIG: ENV_CONFIG
   };
 })(window);

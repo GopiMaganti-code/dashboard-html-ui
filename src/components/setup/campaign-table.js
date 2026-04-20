@@ -41,8 +41,8 @@
       global.__campaignFilterListenersBound = true;
       document.querySelectorAll('#campaign-status-filters .campaign-filter-chip').forEach(function(chip){
         chip.addEventListener('click', function(){
-          var f = chip.getAttribute('data-filter') || 'all';
-          global.__campaignSetupFilter = f;
+          var f = chip.getAttribute('data-filter') || 'queued';
+          global.__setupLeadsRunStatusFilter = String(f || 'queued').toLowerCase();
           document.querySelectorAll('#campaign-status-filters .campaign-filter-chip').forEach(function(c){
             c.classList.toggle('is-active', c === chip);
           });
@@ -61,12 +61,13 @@
 
   function resetCampaignFilterState(){
     global.__campaignSetupFilter = 'all';
+    global.__setupLeadsRunStatusFilter = 'queued';
     global.__campaignSetupSearchQuery = '';
     var searchInput = document.getElementById('campaign-search-input');
     if (searchInput) searchInput.value = '';
     document.querySelectorAll('#campaign-status-filters .campaign-filter-chip').forEach(function(c){
       var f = c.getAttribute('data-filter') || '';
-      c.classList.toggle('is-active', f === 'all');
+      c.classList.toggle('is-active', String(f).toLowerCase() === 'queued');
     });
   }
 

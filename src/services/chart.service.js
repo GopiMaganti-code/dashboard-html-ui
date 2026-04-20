@@ -1,4 +1,79 @@
 ;(function(global){
+  function toNumberOrZero(value){
+    var n = Number(value);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function parseDailyActionDateKey(key){
+    var m = String(key || '').match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    if (!m) return null;
+    var day = Number(m[1]);
+    var month = Number(m[2]);
+    var year = Number(m[3]);
+    var date = new Date(year, month - 1, day);
+    if (isNaN(date.getTime())) return null;
+    return date;
+  }
+
+  function formatDailyLabel(date){
+    if (!date || isNaN(date.getTime())) return '';
+    try {
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    } catch (e) {
+      return date.toISOString().slice(0, 10);
+    }
+  }
+
+  function buildPayloadFromDailyCounts(dailyActionCounts){
+    var source = dailyActionCounts && typeof dailyActionCounts === 'object' ? dailyActionCounts : {};
+    var entries = Object.keys(source).map(function(key){
+      var parsedDate = parseDailyActionDateKey(key);
+      return {
+        key: key,
+        date: parsedDate,
+        sortTs: parsedDate ? parsedDate.getTime() : Number.MAX_SAFE_INTEGER,
+        values: source[key] && typeof source[key] === 'object' ? source[key] : {}
+      };
+    }).filter(function(entry){
+      return !!entry.date;
+    }).sort(function(a, b){
+      return a.sortTs - b.sortTs;
+    });
+
+    var labels = entries.map(function(entry){ return formatDailyLabel(entry.date); });
+    var connections = entries.map(function(entry){
+      var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
+      return toNumberOrZero(distinct.connections_sent);
+    });
+    var views = entries.map(function(entry){
+      var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
+      return toNumberOrZero(distinct.views);
+    });
+    var posts = entries.map(function(entry){
+      var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
+      return toNumberOrZero(distinct.like_post);
+    });
+    var messages = entries.map(function(entry){
+      var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
+      return toNumberOrZero(distinct.messages_sent);
+    });
+    var accepted = entries.map(function(entry){
+      var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
+      return toNumberOrZero(distinct.connected);
+    });
+
+    return {
+      labels: labels,
+      datasets: [
+        { label: 'Connections Sent', data: connections },
+        { label: 'Profile Views', data: views },
+        { label: 'Posts Liked', data: posts },
+        { label: 'Messages Sent', data: messages },
+        { label: 'Accepted', data: accepted }
+      ]
+    };
+  }
+
   function getLogger(){
     if (global.AppLogger && typeof global.AppLogger.debug === 'function') return global.AppLogger;
     return { debug: function(){} };
@@ -19,7 +94,7 @@
     var overviewPayload = deps.getOverviewChartPayload ? deps.getOverviewChartPayload() : null;
     var labels = (overviewPayload && Array.isArray(overviewPayload.labels))
       ? overviewPayload.labels.slice()
-      : ['Apr 1','Apr 2','Apr 3','Apr 4','Apr 5','Apr 6'];
+      : [];
     var C = {
       connections:'#5BB89A',
       profile:'#7B6FD6',
@@ -43,13 +118,6 @@
       }
       return 0;
     }
-    var fallbackDatasets = [
-      { label: 'Connections Sent', data: [2,3,1,4,0,1], backgroundColor: C.connections, borderWidth: 0, borderSkipped: false, borderRadius: stackedTopBorderRadius },
-      { label: 'Profile Views', data: [1,2,2,1,0,1], backgroundColor: C.profile, borderWidth: 0, borderSkipped: false, borderRadius: stackedTopBorderRadius },
-      { label: 'Posts Liked', data: [3,2,3,4,2,1], backgroundColor: C.posts, borderWidth: 0, borderSkipped: false, borderRadius: stackedTopBorderRadius },
-      { label: 'Messages Sent', data: [1,0,1,1,0,0], backgroundColor: C.messages, borderWidth: 0, borderSkipped: false, borderRadius: stackedTopBorderRadius },
-      { label: 'Accepted', data: [0,1,0,1,0,0], backgroundColor: C.accepted, borderWidth: 0, borderSkipped: false, borderRadius: stackedTopBorderRadius }
-    ];
     var apiDatasets = (overviewPayload && Array.isArray(overviewPayload.datasets))
       ? overviewPayload.datasets.map(function(ds, idx){
           var palette = [C.connections, C.profile, C.posts, C.messages, C.accepted];
@@ -62,12 +130,12 @@
             borderRadius: stackedTopBorderRadius
           };
         })
-      : null;
+      : [];
     deps.setChartInstance(new deps.ChartCtor(ctx, {
       type: 'bar',
       data: {
         labels: labels,
-        datasets: apiDatasets && apiDatasets.length ? apiDatasets : fallbackDatasets
+        datasets: apiDatasets
       },
       options: {
         responsive: true,
@@ -123,10 +191,8 @@
           y: {
             stacked: true,
             beginAtZero: true,
-            max: 12,
             grid: { color: 'rgba(148, 163, 184, 0.28)', drawBorder: false },
             ticks: {
-              stepSize: 2,
               font: { family: "'Inter',system-ui,sans-serif", size: 11 },
               color: '#64748b',
               padding: 6
@@ -155,6 +221,7 @@
 
   global.AppChartService = {
     initChart: initChart,
-    resizeChart: resizeChart
+    resizeChart: resizeChart,
+    buildPayloadFromDailyCounts: buildPayloadFromDailyCounts
   };
 })(window);

@@ -9,6 +9,15 @@
     return 'Active';
   }
 
+  /** Row tone for list striping / emphasis (API + legacy statuses). */
+  function campaignListRowTone(st){
+    var k = String(st || '').trim().toLowerCase();
+    if (k === 'stopped' || k === 'closed' || k === 'failed') return 'stopped';
+    if (k === 'inactive' || k === 'paused') return 'inactive';
+    if (k === 'completed' || k === 'contacted') return 'contacted';
+    return 'active';
+  }
+
   function getCampaignsSorted(raw){
     var list = Array.isArray(raw && raw.campaigns) ? raw.campaigns.slice() : [];
     list.sort(function(a, b){
@@ -20,6 +29,19 @@
   }
 
   function statusBadgeHtml(status){
+    var k = String(status || '').trim().toLowerCase();
+    if (k === 'paused') {
+      return '<span class="campaign-status-badge campaign-status-badge--inactive"><span class="campaign-status-dot campaign-status-dot--inactive" aria-hidden="true"></span>Paused</span>';
+    }
+    if (k === 'completed') {
+      return '<span class="campaign-status-badge campaign-status-badge--contacted"><span class="campaign-status-dot campaign-status-dot--active" aria-hidden="true"></span>Completed</span>';
+    }
+    if (k === 'closed') {
+      return '<span class="campaign-status-badge campaign-status-badge--stopped"><span class="campaign-status-dot campaign-status-dot--stopped" aria-hidden="true"></span>Closed</span>';
+    }
+    if (k === 'active') {
+      return '<span class="campaign-status-badge campaign-status-badge--active"><span class="campaign-status-dot campaign-status-dot--active" aria-hidden="true"></span>Active</span>';
+    }
     var st = normalizeCampaignStatusLocal(status);
     var cls = 'campaign-status-badge--active';
     var dot = 'campaign-status-dot--active';
@@ -30,9 +52,7 @@
   }
 
   function filterCampaigns(list, activeFilter, searchQuery){
-    var filtered = activeFilter === 'all'
-      ? list
-      : list.filter(function(c){ return normalizeCampaignStatusLocal(c.status) === activeFilter; });
+    var filtered = Array.isArray(list) ? list.slice() : [];
     var q = (searchQuery || '').toLowerCase();
     if (q) {
       filtered = filtered.filter(function(c){
@@ -59,7 +79,7 @@
     var monitorBtn = idAttr
       ? '<button type="button" class="btn-monitor" data-campaign-id="' + idAttr + '">Monitor</button>'
       : '<span class="campaign-monospace">—</span>';
-    var rowCls = 'campaign-row--' + normalizeCampaignStatusLocal(c.status).toLowerCase();
+    var rowCls = 'campaign-row--' + campaignListRowTone(c.status);
     return '<tr class="' + rowCls + '">' +
       '<td data-label="Campaign">' + nameBlock + '</td>' +
       '<td data-label="AI SDR email"><span class="campaign-monospace">' + helpers.escapeHtml(email) + '</span></td>' +
@@ -70,6 +90,14 @@
       '</tr>';
   }
 
+  function mapApiCampaignStatusToAppState(raw){
+    var k = String(raw || '').trim().toLowerCase();
+    if (k === 'paused' || k === 'completed') return 'Inactive';
+    if (k === 'closed') return 'Stopped';
+    if (k === 'active') return 'Active';
+    return normalizeCampaignStatusLocal(raw);
+  }
+
   function monitorCampaign(campaignId, deps){
     if (campaignId == null || campaignId === '') return;
     deps.ensureCampaignsSeed();
@@ -77,7 +105,7 @@
     var list = Array.isArray(raw.campaigns) ? raw.campaigns : [];
     var row = list.find(function(c){ return c && String(c.campaignId) === String(campaignId); });
     if (!row) return;
-    var st = normalizeCampaignStatusLocal(row.status);
+    var st = mapApiCampaignStatusToAppState(row.status);
     deps.saveAppState({
       activeCampaignId: String(row.campaignId),
       aiSdrEmail: row.aiSdrEmail || raw.aiSdrEmail || '',
@@ -92,6 +120,8 @@
       deps.renderFailedActions();
       deps.resizeActivityChart();
     }
+    if (typeof deps.hydrateOverviewFromApi === 'function') deps.hydrateOverviewFromApi();
+    if (typeof deps.hydrateCampaignDetailCardsFromApi === 'function') deps.hydrateCampaignDetailCardsFromApi({ force: true });
   }
 
   global.AppCampaignService = {
@@ -99,6 +129,8 @@
     statusBadgeHtml: statusBadgeHtml,
     filterCampaigns: filterCampaigns,
     buildCampaignRowHtml: buildCampaignRowHtml,
-    monitorCampaign: monitorCampaign
+    monitorCampaign: monitorCampaign,
+    campaignListRowTone: campaignListRowTone,
+    mapApiCampaignStatusToAppState: mapApiCampaignStatusToAppState
   };
 })(window);
