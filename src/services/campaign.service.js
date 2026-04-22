@@ -117,6 +117,7 @@
     if (!deps.hasActivityChart()) {
       deps.bootChartsAndFailed();
     } else {
+      if (typeof deps.initDashboardRunTracking === 'function') deps.initDashboardRunTracking();
       deps.renderFailedActions();
       deps.resizeActivityChart();
     }

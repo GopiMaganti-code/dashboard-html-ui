@@ -16,6 +16,12 @@
   function renderFailedActionsPanel(deps){
     var mount = document.getElementById('failed-actions-list');
     if (!mount) return;
+    var items = Array.isArray(deps.failedActions) ? deps.failedActions : [];
+    var emptyMessage = String((deps && deps.emptyMessage) || 'No failures found for this campaign yet.');
+    if (!items.length) {
+      mount.innerHTML = '<div class="failed-actions-empty" role="status" aria-live="polite">' + deps.escapeHtml(emptyMessage) + '</div>';
+      return;
+    }
     var classify = deps.classifyFailure || function(logs, reason){
       if (global.AppMonitoringMetrics && typeof global.AppMonitoringMetrics.classifyFailure === 'function') {
         return global.AppMonitoringMetrics.classifyFailure(logs, reason);
@@ -24,7 +30,7 @@
     };
     var eye = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
     var docIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>';
-    mount.innerHTML = deps.failedActions.map(function(item, i){
+    mount.innerHTML = items.map(function(item, i){
       var hasShot = !!(item.screenshot_url && String(item.screenshot_url).trim());
       var shotTitle = hasShot ? 'View screenshot captured at failure' : 'No screenshot available';
       var logsOk = item && item.disable_logs ? false : deps.failedActionLogsAvailable(item);
@@ -42,19 +48,22 @@
       var rowSev = severityClass(fSev);
       var em = severityEmoji(fSev);
       return '<div class="failed-item ' + rowSev + '">' +
-        '<div class="failed-item-main">' +
-        '<div class="failed-lead">' + deps.escapeHtml(item.lead) + '</div>' +
-        '<div class="failed-title">' + deps.escapeHtml(item.title || '') + '</div>' +
-        '<div class="failed-failure-type"><span class="ft-pill ft-pill--' + deps.escapeHtml(fSev) + '" title="Failure type">' +
-        deps.escapeHtml(em) + ' <span class="ft-label">Failure type:</span> ' + deps.escapeHtml(fType) + '</span></div>' +
-        '<div class="failed-reason">' + deps.escapeHtml(item.reason) + '</div>' +
-        '<div class="failed-time">' + deps.escapeHtml(item.timestamp) + '</div></div>' +
-        '<div class="failed-item-actions">' +
+        '<div class="failed-item-head">' +
+        '<div class="failed-lead" title="' + deps.escapeHtml(item.lead || '') + '">' + deps.escapeHtml(item.lead) + '</div>' +
         '<span class="pill pill-fail">failed</span>' +
+        '</div>' +
+        '<div class="failed-item-main">' +
+        '<div class="failed-title" title="' + deps.escapeHtml(item.title || '') + '">' + deps.escapeHtml(item.title || '—') + '</div>' +
+        '<div class="failed-reason" title="' + deps.escapeHtml(item.reason || '') + '">' + deps.escapeHtml(item.reason || '—') + '</div>' +
+        '<div class="failed-failure-type"><span class="ft-pill ft-pill--' + deps.escapeHtml(fSev) + '" title="Failure type">' +
+        deps.escapeHtml(em) + ' <span class="ft-label">Failure:</span> ' + deps.escapeHtml(fType) + '</span></div>' +
+        '<div class="failed-time">' + deps.escapeHtml(item.timestamp) + '</div>' +
+        '</div>' +
+        '<div class="failed-item-actions">' +
         '<div class="failed-item-buttons">' +
-        '<button type="button" class="btn-shot-ghost" data-shot-idx="' + i + '"' + (hasShot ? '' : ' disabled') + ' title="' + deps.escapeHtml(shotTitle) + '">' +
+        '<button type="button" class="btn-shot-ghost btn-shot-ghost--primary" data-shot-idx="' + i + '"' + (hasShot ? '' : ' disabled') + ' title="' + deps.escapeHtml(shotTitle) + '">' +
         eye + ' View Screenshot</button>' +
-        '<button type="button" class="btn-shot-ghost" data-logs-idx="' + i + '"' + (logsOk ? '' : ' disabled') + ' title="' + deps.escapeHtml(logsTitle) + '">' +
+        '<button type="button" class="btn-shot-ghost btn-shot-ghost--secondary" data-logs-idx="' + i + '"' + (logsOk ? '' : ' disabled') + ' title="' + deps.escapeHtml(logsTitle) + '">' +
         docIcon + ' View Logs</button>' +
         '</div></div></div>';
     }).join('');

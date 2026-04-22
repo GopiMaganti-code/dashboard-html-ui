@@ -40,26 +40,40 @@
       return a.sortTs - b.sortTs;
     });
 
-    var labels = entries.map(function(entry){ return formatDailyLabel(entry.date); });
-    var connections = entries.map(function(entry){
+    var nonZeroEntries = entries.filter(function(entry){
+      var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
+      var total = toNumberOrZero(distinct.connections_sent) +
+        toNumberOrZero(distinct.views) +
+        toNumberOrZero(distinct.messages_sent) +
+        toNumberOrZero(distinct.like_post) +
+        toNumberOrZero(distinct.connected) +
+        toNumberOrZero(distinct.replied);
+      return total > 0;
+    });
+    var labels = nonZeroEntries.map(function(entry){ return formatDailyLabel(entry.date); });
+    var connections = nonZeroEntries.map(function(entry){
       var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
       return toNumberOrZero(distinct.connections_sent);
     });
-    var views = entries.map(function(entry){
+    var views = nonZeroEntries.map(function(entry){
       var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
       return toNumberOrZero(distinct.views);
     });
-    var posts = entries.map(function(entry){
+    var posts = nonZeroEntries.map(function(entry){
       var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
       return toNumberOrZero(distinct.like_post);
     });
-    var messages = entries.map(function(entry){
+    var messages = nonZeroEntries.map(function(entry){
       var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
       return toNumberOrZero(distinct.messages_sent);
     });
-    var accepted = entries.map(function(entry){
+    var accepted = nonZeroEntries.map(function(entry){
       var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
       return toNumberOrZero(distinct.connected);
+    });
+    var replied = nonZeroEntries.map(function(entry){
+      var distinct = entry.values && typeof entry.values.distinct === 'object' ? entry.values.distinct : {};
+      return toNumberOrZero(distinct.replied);
     });
 
     return {
@@ -69,7 +83,8 @@
         { label: 'Profile Views', data: views },
         { label: 'Posts Liked', data: posts },
         { label: 'Messages Sent', data: messages },
-        { label: 'Accepted', data: accepted }
+        { label: 'Connected', data: accepted },
+        { label: 'Replied', data: replied }
       ]
     };
   }
@@ -120,7 +135,7 @@
     }
     var apiDatasets = (overviewPayload && Array.isArray(overviewPayload.datasets))
       ? overviewPayload.datasets.map(function(ds, idx){
-          var palette = [C.connections, C.profile, C.posts, C.messages, C.accepted];
+          var palette = [C.connections, C.profile, C.posts, C.messages, C.accepted, '#0EA5E9'];
           return {
             label: ds.label || ('Series ' + (idx + 1)),
             data: Array.isArray(ds.data) ? ds.data.slice() : [],
@@ -177,7 +192,15 @@
               label: function(context){
                 var label = context.dataset.label || '';
                 var v = context.parsed.y !== null ? context.parsed.y : context.raw;
-                return ' ' + label + ': ' + v;
+                var tooltipMap = {
+                  'Connections Sent': 'Connections',
+                  'Profile Views': 'Views',
+                  'Messages Sent': 'Messages'
+                };
+                var formattedLabel = tooltipMap[label] || label;
+                var num = Number(v);
+                var formattedValue = isNaN(num) ? String(v) : num.toLocaleString();
+                return ' ' + formattedLabel + ': ' + formattedValue;
               }
             }
           }

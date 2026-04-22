@@ -17,7 +17,6 @@
 
 <div id="app-global-loading" style="display:none;position:fixed;top:0;left:0;right:0;z-index:10000;background:#0a66c2;color:#fff;padding:6px 12px;font-size:12px;font-weight:600;">Loading latest data…</div>
 <div id="app-global-error" style="display:none;position:fixed;top:34px;left:50%;transform:translateX(-50%);z-index:10001;background:#fff1f2;color:#9f1239;border:1px solid #fecdd3;border-radius:8px;padding:8px 12px;font-size:12px;max-width:min(92vw,760px);"></div>
-<div id="app-mode-badge" style="position:fixed;top:10px;right:10px;z-index:10002;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em;background:#f1f5f9;color:#334155;border:1px solid #cbd5e1;">DUMMY MODE</div>
 <div class="app" id="appRoot">
 
 <div class="screen active" id="screen-setup">
@@ -79,6 +78,7 @@
                   <th scope="col">AI SDR email</th>
                   <th scope="col">Environment</th>
                   <th scope="col">Status</th>
+                  <th scope="col">Activity</th>
                   <th scope="col">Created at</th>
                   <th scope="col">Actions</th>
                 </tr>
@@ -144,27 +144,33 @@
 
 <div class="screen" id="screen-dashboard">
   <div class="top-bar">
-    <div class="top-bar-left">
-      <div class="dashboard-title-row">
+    <div class="top-bar-left dashboard-header-left">
+      <div class="dashboard-title-row dashboard-title-row--main">
         <button type="button" class="btn-setup btn-back-inline" onclick="openSetupScreen()" title="Back to campaign setup" aria-label="Back to campaign setup">
           <span class="btn-setup-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/><path d="M9 12h11"/></svg></span>
           <span class="btn-setup-text">Back</span>
         </button>
         <h1>LinkedIn Campaign Dashboard</h1>
       </div>
-      <p id="dashboard-campaign-sub">Campaign ID: 69cf8f5d46691ec7d7bf8cc88</p>
-      <div class="badge" id="dashboard-status-badge"><span class="badge-dot"></span>Active</div>
-    </div>
-    <div class="top-bar-right">
-      <div class="header-status-bar" aria-label="Session context">
-        <span class="header-env-badge env-badge--none">ENV: —</span>
+      <div class="dashboard-header-meta">
+        <p id="dashboard-campaign-sub">Campaign ID: 69cf8f5d46691ec7d7bf8cc88</p>
+        <div class="badge badge--campaign-active" id="dashboard-status-badge" title="Campaign is enabled and ready to run"><span class="badge-dot badge-dot--campaign-active"></span>Campaign Active</div>
       </div>
-      <button type="button" class="btn-setup" onclick="openSetupScreen()" title="Back to campaign setup" aria-label="Back to campaign setup">
-        <span class="btn-setup-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>
-        <span class="btn-setup-text">Back</span>
-      </button>
-      <button type="button" class="btn" id="dashboard-refresh-btn">Refresh</button>
-      <button type="button" class="btn btn-danger">Cancel Campaign</button>
+    </div>
+    <div class="dashboard-header-center" aria-label="Campaign context">
+      <span class="dashboard-breadcrumb">Dashboard &gt; Campaign</span>
+    </div>
+    <div class="top-bar-right dashboard-header-right">
+      <div class="header-status-bar dashboard-env-wrap" aria-label="Session context">
+        <span class="header-env-badge env-badge--none">ENV: Dev</span>
+      </div>
+      <div class="dashboard-actions-group">
+        <button type="button" class="btn" id="dashboard-refresh-btn">Refresh</button>
+        <button type="button" class="btn dashboard-btn-primary" id="dashboard-ip-monitoring-btn" onclick="openIpMonitoringScreen()">
+          View IP Monitoring
+        </button>
+        <button type="button" class="btn btn-danger">Cancel Campaign</button>
+      </div>
       <div class="sender-profile" aria-label="AI SDR account">
         <div class="sender-avatar app-sdr-initials" aria-hidden="true">—</div>
         <div class="sender-profile-text">
@@ -192,8 +198,10 @@
     <div id="dashboard-alerts-panel" class="panel alerts-panel" aria-live="polite"></div>
   </section>
 
-  <section class="dashboard-section dashboard-section--activity-summary" aria-label="Activity summary">
-    <div class="sec-title">Activity summary</div>
+  <section class="dashboard-section dashboard-section--activity-summary" aria-label="Performance overview">
+    <div class="dashboard-section-head">
+      <div class="sec-title">Performance Overview</div>
+    </div>
     <div class="dashboard-group-grid">
       <div class="dashboard-group-card">
         <div class="dashboard-group-title">Engagement</div>
@@ -219,7 +227,7 @@
             <div class="stat-icon" style="background:#E6F1FB;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
             <div class="stat-num">10</div><div class="stat-lbl">Recent runs</div><div class="stat-trend trend-up">↑ last 24h</div>
           </div>
-          <div class="stat-card" data-stat-key="messages-sent" onclick="showDetail('messages-sent')" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showDetail('messages-sent')">
+          <div class="stat-card" data-stat-key="messages-sent" onclick="showMessages()" role="button" tabindex="0" onkeydown="if(event.key==='Enter')showMessages()">
             <div class="stat-icon" style="background:#FBEAF0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#993556" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div>
             <div class="stat-num">4</div><div class="stat-lbl">Messages</div><div class="stat-trend">→ 2 replied</div>
           </div>
@@ -249,6 +257,65 @@
     </div>
   </section>
 
+  <section class="dashboard-section dashboard-section--automation-insights" aria-label="Automation health insights">
+    <div class="panel automation-insights-panel" id="automation-insights-panel">
+      <div class="dashboard-section-head">
+        <div class="sec-title">Automation Health Insights</div>
+      </div>
+      <div class="automation-insights-grid">
+        <div class="automation-insight-card" id="automation-run-health-card">
+          <div class="automation-insight-title">Run health</div>
+          <dl class="automation-insight-kv">
+            <dt>Health score <span class="automation-insight-help" title="Overall automation health score from backend health.score.">ℹ️</span></dt>
+            <dd><span id="ahi-health-score">--</span> <span id="ahi-health-label" class="automation-health-label">--</span></dd>
+            <dt>Total runs</dt><dd id="ahi-total-runs">—</dd>
+            <dt>Success rate <span class="automation-insight-help" title="Action success rate from flow_runs.action_metrics.success_rate.">ℹ️</span></dt><dd id="ahi-success-rate">—</dd>
+            <dt>Failure rate <span class="automation-insight-help" title="Action failure rate from flow_runs.action_metrics.failure_rate.">ℹ️</span></dt><dd id="ahi-failure-rate">—</dd>
+            <dt>Automation Efficiency <span class="automation-insight-help" title="Performance score from health.components.performance_score.">ℹ️</span></dt><dd id="ahi-performance-score">—</dd>
+            <dt>Latest run</dt><dd id="ahi-latest-run">—</dd>
+            <dt>Session <span class="automation-insight-help" title="Saved session status based on cookies and li_at token availability.">ℹ️</span></dt><dd id="ahi-session-line">--</dd>
+          </dl>
+          <div class="automation-progress">
+            <div class="automation-progress-label">Success progress <span class="automation-progress-note">(Based on action success rate)</span></div>
+            <div class="automation-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ahi-success-progress-track">
+              <div class="automation-progress-fill" id="ahi-success-progress-fill" style="width:0%;"></div>
+            </div>
+          </div>
+          <div class="automation-status-badges" id="ahi-status-badges">
+            <span class="automation-status-badge">Queued: —</span>
+            <span class="automation-status-badge">Waiting: —</span>
+            <span class="automation-status-badge">Running: —</span>
+            <span class="automation-status-badge">Completed: —</span>
+          </div>
+          <div class="automation-smart-alerts" id="ahi-smart-alerts"></div>
+        </div>
+        <div class="automation-insight-card" id="automation-top-failures-card">
+          <div class="automation-insight-title-row">
+            <div class="automation-insight-title">Action performance breakdown</div>
+            <span class="automation-insight-help" title="Per-action success rate from flow_runs.action_metrics.by_action.">ℹ️</span>
+          </div>
+          <div class="automation-failures-wrap">
+            <table class="automation-failures-table" role="grid" aria-label="Action performance breakdown">
+              <thead>
+                <tr>
+                  <th>Action</th>
+                  <th>Success</th>
+                  <th>Failure</th>
+                  <th>Success Rate</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="ahi-action-performance-body">
+                <tr><td colspan="5" class="automation-empty-row">Loading action performance…</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="automation-insights-error" id="ahi-error" hidden></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="dashboard-section dashboard-section--chart" aria-label="Activity chart">
     <div class="panel activity-chart-panel">
       <div class="dashboard-section-head">
@@ -262,65 +329,56 @@
     </div>
   </section>
 
-  <section class="dashboard-section dashboard-section--runs" aria-label="Run execution">
-    <div class="two-col two-col--runs">
-      <div class="panel">
-        <div id="recent-runs-summary-slot"></div>
+  <section class="dashboard-section dashboard-section--runs" aria-label="Runs">
+    <div class="panel runs-panel">
+      <div class="dashboard-section-head">
+        <div class="sec-title">Runs</div>
+        <div class="runs-toggle" role="tablist" aria-label="Run dataset toggle">
+          <button id="runs-toggle-upcoming" class="runs-toggle-pill" type="button" onclick="setRunsView('upcoming')" role="tab" aria-selected="false">Upcoming Runs</button>
+          <button id="runs-toggle-recent" class="runs-toggle-pill is-active" type="button" onclick="setRunsView('recent')" role="tab" aria-selected="true">Recent Runs</button>
+        </div>
       </div>
-      <div class="panel">
-        <div class="sec-title" style="color:#b91c1c;">Failed actions</div>
-        <div id="failed-actions-list" class="failed-actions-list" aria-live="polite"></div>
+      <div class="runs-table-wrap">
+        <table class="runs-table" role="grid" aria-label="Runs monitoring table">
+          <thead>
+            <tr>
+              <th>Lead</th>
+              <th>Status</th>
+              <th>Action</th>
+              <th>Time</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="runs-merged-body">
+            <tr><td colspan="5" class="automation-empty-row">Loading runs…</td></tr>
+          </tbody>
+        </table>
       </div>
+      <div id="recent-runs-summary-slot" hidden></div>
+    </div>
+    <div class="panel">
+      <div class="sec-title" style="color:#b91c1c;">Failed actions</div>
+      <div id="failed-actions-list" class="failed-actions-list" aria-live="polite"></div>
     </div>
   </section>
 
-  <section class="dashboard-section dashboard-section--health" aria-label="System health">
-    <div class="panel">
-      <div class="sec-title">Profile Health</div>
-      <div class="system-health-grid">
-        <div id="session-network-panel" class="session-network-mount" aria-label="Session and network monitoring"></div>
-        <div id="monitoring-advanced-slot" class="monitoring-advanced-slot" aria-label="Monitoring insights">
-          <div class="monitoring-advanced-grid monitoring-widgets-grid">
-            <div class="monitoring-card monitoring-card--live" id="widget-profile-health">
-              <div class="monitoring-card-title">Profile Health Overview</div>
-              <p class="monitoring-card-note">Real-time automation and session health.</p>
-              <div class="profile-health-head">
-                <div class="profile-health-score" id="profile-health-score">--</div>
-                <span class="profile-health-label profile-health-label--unknown" id="profile-health-label">unknown</span>
-              </div>
-              <div class="profile-health-metrics">
-                <div class="profile-health-kv"><span>Success rate</span><strong id="profile-health-success-rate">--</strong></div>
-                <div class="profile-health-kv"><span>Failure rate</span><strong id="profile-health-failure-rate">--</strong></div>
-              </div>
-              <div class="profile-health-insights">
-                <div class="profile-health-kv"><span>Total runs</span><strong id="profile-health-total-runs">--</strong></div>
-                <div class="profile-health-kv"><span>Last run</span><strong id="profile-health-last-run">--</strong></div>
-                <div class="profile-health-kv"><span>Session</span><strong id="profile-health-session-status">--</strong></div>
-              </div>
-              <div class="profile-health-status-row" id="profile-health-run-breakdown">
-                <span class="profile-health-status-chip">Queued: --</span>
-                <span class="profile-health-status-chip">Waiting: --</span>
-                <span class="profile-health-status-chip">Running: --</span>
-              </div>
-            </div>
-            <div class="monitoring-card monitoring-card--live" id="widget-top-failures">
-              <div class="monitoring-card-title">Top failure types</div>
-              <p class="monitoring-card-note">Share of recent failed actions.</p>
-              <ul class="monitoring-widget-list" id="top-failures-list">
-                <li class="mw-empty">—</li>
-              </ul>
-            </div>
-            <div class="monitoring-card monitoring-card--live" id="widget-run-health">
-              <div class="monitoring-card-title">Run health</div>
-              <p class="monitoring-card-note" id="run-health-source">From last stored runs</p>
-              <dl class="monitoring-dl monitoring-dl--run-health">
-                <dt>Processed</dt><dd id="rh-processed">—</dd>
-                <dt>Success runs</dt><dd id="rh-success">—</dd>
-                <dt>Failed runs</dt><dd id="rh-failed">—</dd>
-                <dt>Success rate</dt><dd id="rh-rate">—</dd>
-              </dl>
-            </div>
-          </div>
+  <section class="dashboard-section dashboard-section--campaign-schedule" aria-label="Campaign schedule">
+    <div class="panel campaign-schedule-panel">
+      <div class="dashboard-section-head">
+        <div class="sec-title">Campaign Schedule</div>
+      </div>
+      <div class="campaign-schedule-grid">
+        <div class="campaign-schedule-item">
+          <span class="campaign-schedule-label">Eligible Now</span>
+          <span id="campaign-schedule-eligible-badge" class="campaign-schedule-badge campaign-schedule-badge--unknown">—</span>
+        </div>
+        <div class="campaign-schedule-item">
+          <span class="campaign-schedule-label" title="Campaign timezone used for scheduling decisions">Timezone</span>
+          <span id="campaign-schedule-timezone" class="campaign-schedule-value">—</span>
+        </div>
+        <div class="campaign-schedule-item">
+          <span class="campaign-schedule-label">Next Run</span>
+          <span id="campaign-schedule-next-run" class="campaign-schedule-value">—</span>
         </div>
       </div>
     </div>
@@ -335,6 +393,45 @@
   </section>
 </div>
 
+<div class="screen" id="screen-ip-monitoring">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="dashboard-title-row">
+        <button type="button" class="btn-setup btn-back-inline" onclick="showAppScreen('screen-dashboard')" title="Back to campaign dashboard" aria-label="Back to campaign dashboard">
+          <span class="btn-setup-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/><path d="M9 12h11"/></svg></span>
+          <span class="btn-setup-text">Back</span>
+        </button>
+        <h1>Campaign IP Monitoring</h1>
+      </div>
+      <p class="ipm-breadcrumb">Dashboard &gt; Campaign &gt; IP Monitoring</p>
+      <p id="ip-monitoring-campaign-sub">Campaign ID: —</p>
+      <div class="badge badge--campaign-active" id="ip-monitoring-status-badge" title="Campaign is enabled and ready to run"><span class="badge-dot badge-dot--campaign-active"></span>Campaign Active</div>
+    </div>
+    <div class="top-bar-right">
+      <div class="header-status-bar" aria-label="Session context">
+        <span class="header-env-badge env-badge--none">ENV: —</span>
+      </div>
+      <button type="button" class="btn" onclick="openIpMonitoringScreen()">Refresh</button>
+      <button type="button" class="btn" onclick="showAppScreen('screen-dashboard')">Back to Campaign</button>
+      <div class="sender-profile" aria-label="AI SDR account">
+        <div class="sender-avatar app-sdr-initials" aria-hidden="true">—</div>
+        <div class="sender-profile-text">
+          <div class="sender-name-row">
+            <div class="sender-name">AI SDR</div>
+            <span class="premium-badge hidden app-premium-badge" title=""></span>
+          </div>
+          <div class="sender-email app-sdr-email">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <section class="dashboard-section dashboard-section--health dashboard-section--ip-monitoring" aria-label="Campaign IP monitoring">
+    <div class="panel panel--ip-monitoring">
+      <div id="session-network-panel" class="session-network-mount session-network-mount--full" aria-label="Campaign IP monitoring panel"></div>
+    </div>
+  </section>
+</div>
+
 <div class="screen" id="screen-detail">
   <div class="top-bar top-bar--toolbar-only">
     <div class="top-bar-right">
@@ -342,7 +439,7 @@
         <span class="header-env-badge env-badge--none">ENV: —</span>
       </div>
       <button type="button" class="btn-setup" onclick="openSetupScreen()" title="Back to campaign setup" aria-label="Back to campaign setup">
-        <span class="btn-setup-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>
+        <span class="btn-setup-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2M19.07 4.93l-2.12 2.12M7.05 16.95l-2.12 2.12M19.07 19.07l-2.12-2.12M7.05 7.05L4.93 4.93"/></svg></span>
         <span class="btn-setup-text">Back</span>
       </button>
       <button type="button" class="btn">Refresh</button>
@@ -434,7 +531,7 @@
         <span class="header-env-badge env-badge--none">ENV: —</span>
       </div>
       <button type="button" class="btn-setup" onclick="openSetupScreen()" title="Back to campaign setup" aria-label="Back to campaign setup">
-        <span class="btn-setup-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></span>
+        <span class="btn-setup-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2M19.07 4.93l-2.12 2.12M7.05 16.95l-2.12 2.12M19.07 19.07l-2.12-2.12M7.05 7.05L4.93 4.93"/></svg></span>
         <span class="btn-setup-text">Back</span>
       </button>
       <button type="button" class="btn">Refresh</button>
@@ -466,6 +563,9 @@
       <aside class="msg-sidebar" aria-label="Conversations">
         <div class="msg-sidebar-head">Conversations</div>
         <div class="msg-list" id="msg-conv-list"></div>
+        <div class="msg-list-more" id="msg-list-more-wrap">
+          <button type="button" class="btn" id="msg-load-more-btn" onclick="loadMoreMessagesForActiveTab()">Load More</button>
+        </div>
       </aside>
       <section class="msg-panel" aria-label="Selected chat">
         <div class="msg-chat-head" id="msg-chat-head">
@@ -902,6 +1002,10 @@ function setCampaignDetailCardsLoading(active){
   if (recentRunsMount && active) {
     recentRunsMount.innerHTML = '<div class="run-replies-empty">Loading recent runs…</div>';
   }
+  var runsMergedBody = document.getElementById('runs-merged-body');
+  if (runsMergedBody && active) {
+    runsMergedBody.innerHTML = '<tr><td colspan="5" class="automation-empty-row">Loading runs…</td></tr>';
+  }
   var btn = document.getElementById('dashboard-refresh-btn');
   if (btn) btn.disabled = !!active;
 }
@@ -1062,24 +1166,227 @@ function applyProfileHealthData(data){
   setStatCardValue('failure-rate', failureText, 'From profile health API');
 }
 
+function applyMonitoringWidgetsFromProfileHealth(data){
+  var payload = data && typeof data === 'object'
+    ? ((data.data && typeof data.data === 'object') ? data.data : data)
+    : {};
+  var flowRuns = payload.flow_runs && typeof payload.flow_runs === 'object' ? payload.flow_runs : {};
+  var actionMetrics = flowRuns.action_metrics && typeof flowRuns.action_metrics === 'object' ? flowRuns.action_metrics : {};
+  var runStatusCounts = flowRuns.run_status_counts && typeof flowRuns.run_status_counts === 'object' ? flowRuns.run_status_counts : {};
+  var totalRunsEl = document.getElementById('ahi-total-runs');
+  var successRateEl = document.getElementById('ahi-success-rate');
+  var failureRateEl = document.getElementById('ahi-failure-rate');
+  var performanceScoreEl = document.getElementById('ahi-performance-score');
+  var latestRunEl = document.getElementById('ahi-latest-run');
+  var healthScoreEl = document.getElementById('ahi-health-score');
+  var healthLabelEl = document.getElementById('ahi-health-label');
+  var sessionLineEl = document.getElementById('ahi-session-line');
+  var badgesEl = document.getElementById('ahi-status-badges');
+  var progressTrack = document.getElementById('ahi-success-progress-track');
+  var progressFill = document.getElementById('ahi-success-progress-fill');
+  var actionBody = document.getElementById('ahi-action-performance-body');
+  var smartAlertsEl = document.getElementById('ahi-smart-alerts');
+  var errorEl = document.getElementById('ahi-error');
+
+  function toPercentNumber(value){
+    if (value == null || value === '') return null;
+    if (typeof value === 'string') value = value.replace('%', '').trim();
+    var n = Number(value);
+    if (isNaN(n)) return null;
+    return Math.max(0, Math.min(100, n));
+  }
+
+  function formatPercent1(value){
+    var n = toPercentNumber(value);
+    return n == null ? '--' : (n.toFixed(1) + '%');
+  }
+
+  function formatCountOrDash(value){
+    if (value === undefined || value === null || value === '') return '--';
+    return formatNumberForUi(toNumberOrZero(value));
+  }
+
+  var totalRuns = pickFirstDefined([flowRuns.total_runs, flowRuns.processed_runs, payload.total_runs]);
+  var totalActions = toNumberOrZero(actionMetrics.total_actions);
+  var successCount = toNumberOrZero(actionMetrics.success_count);
+  var failureCount = toNumberOrZero(actionMetrics.failure_count);
+  var successRatePct = toPercentNumber(actionMetrics.success_rate);
+  var failureRatePct = toPercentNumber(actionMetrics.failure_rate);
+  if (successRatePct == null && totalActions > 0) successRatePct = (successCount / totalActions) * 100;
+  if (successRatePct == null) successRatePct = 0;
+  if (failureRatePct == null && totalActions > 0) failureRatePct = (failureCount / totalActions) * 100;
+  if (failureRatePct == null) failureRatePct = 0;
+  var latestRun = formatRecentRunDisplayTime(flowRuns.latest_run_at);
+  var healthScore = pickFirstDefined([payload.health && payload.health.score, payload.health_score]);
+  var healthLabel = normalizeHealthLabel(payload.health && payload.health.label);
+  var performanceScore = toPercentNumber(payload.health && payload.health.components && payload.health.components.performance_score);
+  var session = payload.session && typeof payload.session === 'object' ? payload.session : {};
+  var savedCookieCount = toNumberOrZero(session.saved_cookie_count);
+  var sessionUpdated = session.saved_session_updated_at ? formatRecentRunDisplayTime(session.saved_session_updated_at) : '';
+  var hasAuth = !!session.saved_li_at_present;
+  var sessionState = session.has_saved_session ? 'Active' : 'Missing';
+  var authState = hasAuth ? 'Auth valid' : 'Auth missing';
+  var sessionStatus = 'Session: ' + sessionState + ' (' + savedCookieCount + ' cookies • ' + authState + ')' + (sessionUpdated ? (' · Updated ' + sessionUpdated) : '');
+
+  if (totalRunsEl) totalRunsEl.textContent = totalRuns != null ? formatCountOrDash(totalRuns) : '--';
+  if (successRateEl) successRateEl.textContent = formatPercent1(successRatePct);
+  if (failureRateEl) failureRateEl.textContent = formatPercent1(failureRatePct);
+  if (performanceScoreEl) performanceScoreEl.textContent = formatPercent1(performanceScore);
+  if (latestRunEl) latestRunEl.textContent = latestRun;
+  if (healthScoreEl) healthScoreEl.textContent = formatPercent1(healthScore);
+  if (healthLabelEl) healthLabelEl.textContent = healthLabel === 'unknown' ? '--' : healthLabel;
+  if (sessionLineEl) sessionLineEl.textContent = sessionStatus;
+  if (progressFill) progressFill.style.width = successRatePct.toFixed(2) + '%';
+  if (progressTrack) progressTrack.setAttribute('aria-valuenow', successRatePct.toFixed(2));
+
+  if (badgesEl) {
+    badgesEl.innerHTML =
+      '<span class="automation-status-badge">Queued: ' + toNumberOrZero(runStatusCounts.queued) + '</span>' +
+      '<span class="automation-status-badge">Waiting: ' + toNumberOrZero(runStatusCounts.waiting) + '</span>' +
+      '<span class="automation-status-badge">Running: ' + toNumberOrZero(runStatusCounts.running) + '</span>' +
+      '<span class="automation-status-badge">Completed: ' + toNumberOrZero(pickFirstDefined([runStatusCounts.completed, runStatusCounts.done])) + '</span>';
+  }
+
+  var byAction = (flowRuns && flowRuns.action_metrics && flowRuns.action_metrics.by_action && typeof flowRuns.action_metrics.by_action === 'object')
+    ? flowRuns.action_metrics.by_action
+    : {};
+  function formatActionLabel(raw){
+    var value = String(raw || '').trim();
+    if (!value) return '';
+    return value.replace(/_/g, ' ').replace(/\b\w/g, function(ch){ return ch.toUpperCase(); });
+  }
+  var actions = [];
+  if (Array.isArray(byAction)) {
+    actions = byAction.map(function(row){
+      var actionKey = row && (row.action_name || row.action || row.name) ? String(row.action_name || row.action || row.name) : '';
+      var success = toNumberOrZero(pickFirstDefined([row && row.distinct_success, row && row.success, row && row.success_count]));
+      var failure = toNumberOrZero(pickFirstDefined([row && row.distinct_failure, row && row.failure, row && row.failures, row && row.failure_count]));
+      var total = toNumberOrZero(pickFirstDefined([row && row.distinct_total, row && row.distinct, row && row.total]));
+      var successRate = toPercentNumber(row && row.success_rate);
+      return {
+        actionName: formatActionLabel(actionKey),
+        actionKey: actionKey,
+        success: success,
+        failure: failure,
+        total: total,
+        successRate: successRate == null ? 0 : successRate
+      };
+    });
+  } else {
+    actions = Object.entries(byAction).map(function(entry){
+      var actionKey = String(entry[0] || '');
+      var row = entry[1] || {};
+      var success = toNumberOrZero(pickFirstDefined([row.distinct_success, row.success, row.success_count]));
+      var failure = toNumberOrZero(pickFirstDefined([row.distinct_failure, row.failure, row.failures, row.failure_count]));
+      var total = toNumberOrZero(pickFirstDefined([row.distinct_total, row.distinct, row.total]));
+      var successRate = toPercentNumber(row.success_rate);
+      return {
+        actionName: formatActionLabel(actionKey),
+        actionKey: actionKey,
+        success: success,
+        failure: failure,
+        total: total,
+        successRate: successRate == null ? 0 : successRate
+      };
+    });
+  }
+  actions = actions.filter(function(a){ return a && a.actionName; }).sort(function(a, b){ return b.successRate - a.successRate; });
+
+  if (actionBody) {
+    if (!actions.length) {
+      actionBody.innerHTML = '<tr><td colspan="5" class="automation-empty-row">No action performance data available</td></tr>';
+    } else {
+      actionBody.innerHTML = actions.map(function(row){
+        var status = 'Healthy';
+        var riskCls = 'automation-risk--low';
+        if (row.successRate < 70) { status = 'Risk'; riskCls = 'automation-risk--high'; }
+        else if (row.failure > 0 && row.successRate >= 70) { status = 'Warning'; riskCls = 'automation-risk--medium'; }
+        else if (row.failure === 0 && row.successRate >= 90) { status = 'Healthy'; riskCls = 'automation-risk--low'; }
+        return '<tr>' +
+          '<td>' + escapeHtml(row.actionName) + '</td>' +
+          '<td>' + formatCountOrDash(row.success) + '</td>' +
+          '<td>' + formatCountOrDash(row.failure) + '</td>' +
+          '<td>' + row.successRate.toFixed(2) + '%</td>' +
+          '<td><span class="automation-risk-pill ' + riskCls + '">' + status + '</span></td>' +
+          '</tr>';
+      }).join('');
+    }
+  }
+
+  if (smartAlertsEl) {
+    var alerts = [];
+    actions.forEach(function(row){
+      var actionFailureRate = Math.max(0, 100 - row.successRate);
+      if (actionFailureRate > 20) alerts.push('⚠ High failure in ' + row.actionName);
+    });
+    var waitingRuns = toNumberOrZero(runStatusCounts.waiting);
+    if (waitingRuns > 0) alerts.push('⚠ ' + waitingRuns + ' runs in waiting state');
+    smartAlertsEl.innerHTML = alerts.length
+      ? alerts.map(function(msg){ return '<div class="automation-alert-item">' + escapeHtml(msg) + '</div>'; }).join('')
+      : '<div class="automation-alert-item automation-alert-item--ok">No active automation alerts</div>';
+  }
+
+  if (errorEl) {
+    var alertMessage = '';
+    errorEl.textContent = alertMessage;
+    errorEl.hidden = !alertMessage;
+    errorEl.classList.remove('automation-insights-error--warning', 'automation-insights-error--critical');
+  }
+}
+
+function setAutomationInsightsLoading(active){
+  var panel = document.getElementById('automation-insights-panel');
+  if (panel) panel.classList.toggle('is-loading', !!active);
+}
+
+function setAutomationInsightsError(message){
+  var errorEl = document.getElementById('ahi-error');
+  if (!errorEl) return;
+  var text = message ? String(message) : '';
+  errorEl.textContent = text;
+  errorEl.hidden = !text;
+}
+
 function hydrateProfileHealthFromApi(ctx, opts){
   if (!window.AppApiIntegration || typeof window.AppApiIntegration.getProfileHealth !== 'function') return Promise.resolve(false);
   var context = ctx || getCampaignDetailFetchContext();
   var options = opts || {};
   setProfileHealthLoading(true);
-  return window.AppApiIntegration.getProfileHealth({ email: context.email, env: context.env }).then(function(data){
+  setAutomationInsightsLoading(true);
+  setAutomationInsightsError('');
+  return window.AppApiIntegration.getProfileHealth({
+    email: context.email,
+    env: context.env,
+    campaign_id: context.campaign_id
+  }).then(function(data){
     if (!data) {
       applyProfileHealthFallback();
+      setAutomationInsightsError('No automation health data returned from profile health API.');
       return false;
     }
     applyProfileHealthData(data);
+    applyMonitoringWidgetsFromProfileHealth(data);
     return true;
   }).catch(function(){
     applyProfileHealthFallback();
+    setAutomationInsightsError('Unable to load automation health insights right now.');
     return false;
   }).finally(function(){
     setProfileHealthLoading(false);
+    setAutomationInsightsLoading(false);
     if (options && options.silentError) return;
+  });
+}
+
+function hydrateCampaignIpMonitoringFromApi(ctx){
+  if (!window.AppApiIntegration || typeof window.AppApiIntegration.getCampaignIps !== 'function') return Promise.resolve(false);
+  var context = ctx || getCampaignDetailFetchContext();
+  return window.AppApiIntegration.getCampaignIps({ email: context.email, env: context.env }).then(function(data){
+    refreshSessionNetworkPanel(data, context);
+    return !!data;
+  }).catch(function(){
+    refreshSessionNetworkPanel(null, context);
+    return false;
   });
 }
 
@@ -1110,7 +1417,7 @@ function applyCampaignDetailActivityChart(campaign){
     activityChartInstance = null;
   }
   initActivityChart();
-  setActivityChartMessage(hasPoints ? '' : 'No daily activity found for this campaign.');
+  setActivityChartMessage(hasPoints ? '' : 'No activity recorded yet.');
 }
 
 function toNumberOrZero(value){
@@ -1129,40 +1436,425 @@ function setStatCardValue(key, value, trend){
 
 function formatRecentRunDisplayTime(raw){
   if (!raw) return '—';
+  var normalized = raw;
   if (window.AppUtilsFormatters && typeof window.AppUtilsFormatters.normalizeTimestampToIso === 'function') {
-    var iso = window.AppUtilsFormatters.normalizeTimestampToIso(raw);
-    if (iso && window.AppUtilsFormatters.formatIsoForDisplay) return window.AppUtilsFormatters.formatIsoForDisplay(iso);
+    normalized = window.AppUtilsFormatters.normalizeTimestampToIso(raw) || raw;
   }
-  return String(raw);
+  var date = new Date(normalized);
+  if (isNaN(date.getTime())) return String(raw);
+  try {
+    var dateText = date.toLocaleDateString(undefined, {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+    var timeText = date.toLocaleTimeString(undefined, {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    return dateText + ' \u00b7 ' + timeText;
+  } catch (e) {
+    return String(raw);
+  }
+}
+
+function formatNumberForUi(value){
+  var n = Number(value);
+  if (isNaN(n)) return '0';
+  try {
+    return n.toLocaleString();
+  } catch (e) {
+    return String(n);
+  }
+}
+
+function formatLeadForDisplay(url){
+  var raw = String(url || '');
+  if (!raw) return { text: '—', full: '—' };
+  var maxLen = 15;
+  if (raw.length <= maxLen) return { text: raw, full: raw };
+  return { text: raw.slice(0, maxLen) + '…', full: raw };
+}
+
+function formatLead(url) {
+  if (!url) return '-';
+  var raw = String(url).trim();
+  var normalized = raw.replace(/^https?:\/\/(www\.)?/i, '');
+  var inIdx = normalized.indexOf('/in/');
+  if (inIdx >= 0) {
+    var slug = normalized.slice(inIdx + 4).replace(/\/$/, '');
+    if (slug) return slug;
+  }
+  return normalized.replace(/\/$/, '');
+}
+
+function mapActionTypeToLabel(value){
+  var raw = String(value || '').trim();
+  if (!raw || raw === '—') return '—';
+  var normalized = raw.toLowerCase();
+  var map = {
+    send_connect: 'Send Connection',
+    view_profile: 'View Profile',
+    send_message: 'Send Message',
+    check_replied: 'Check Reply',
+    like_post: 'Like Post',
+    followup_message: 'Follow-up Message'
+  };
+  if (map[normalized]) return map[normalized];
+  return raw.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
 }
 
 function mapCampaignRecentRuns(recentRuns){
   if (!Array.isArray(recentRuns)) return [];
+  function mapRecentActionStatus(raw){
+    var value = String(raw || '').trim().toLowerCase();
+    if (value === 'waiting_inline') return 'Delay';
+    if (!value) return '';
+    return value.replace(/_/g, ' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+  }
   return recentRuns.map(function(run){
     var lead = run && run.lead && typeof run.lead === 'object' ? run.lead : {};
     var leadUrl = lead.url || (run && run.lead_url) || (run && run.profile_url) || '';
     var lastActionTsRaw = run && run.last_action_ts ? String(run.last_action_ts) : '';
-    var updatedAt = run && run.updated_at ? String(run.updated_at) : '';
-    var actionTimeRaw = lastActionTsRaw || updatedAt;
+    var actionTimeRaw = lastActionTsRaw;
     var sortTs = Date.parse(lastActionTsRaw);
-    if (isNaN(sortTs)) sortTs = Date.parse(updatedAt);
+    var actionLabel = run && run.last_action_label ? String(run.last_action_label) : '—';
+    var actionStatusLabel = mapRecentActionStatus(run && run.last_action_status);
+    var actionText = actionStatusLabel ? (actionLabel + ' (' + actionStatusLabel + ')') : actionLabel;
+    var ok = run && typeof run.last_action_ok === 'boolean' ? run.last_action_ok : null;
     return {
       name: leadUrl || '—',
       initials: 'RR',
       color: '#E6F1FB',
       textColor: '#185FA5',
       url: leadUrl || '',
-      action: (run && run.last_action_label) ? String(run.last_action_label) : '—',
+      action: actionText,
       status: (run && run.status) ? String(run.status).toLowerCase() : 'queued',
-      actionStatus: (run && run.last_action_status) ? String(run.last_action_status) : '',
-      actionOk: typeof (run && run.last_action_ok) === 'boolean' ? run.last_action_ok : null,
+      actionStatus: actionStatusLabel,
+      actionOk: ok,
       time: formatRecentRunDisplayTime(actionTimeRaw),
       timeRaw: actionTimeRaw,
-      sortTs: isNaN(sortTs) ? 0 : sortTs
+      sortTs: isNaN(sortTs) ? 0 : sortTs,
+      result: ok === true ? '✔ Success' : (ok === false ? '❌ Failed' : '—')
     };
   }).sort(function(a, b){
     return b.sortTs - a.sortTs;
   });
+}
+
+function mapUpcomingRunRow(run){
+  var lead = run && run.lead && typeof run.lead === 'object' ? run.lead : {};
+  var leadUrl = lead.url || (run && run.lead_url) || (run && run.profile_url) || '—';
+  var status = run && run.status ? String(run.status) : '—';
+  var resumeAtRaw = run && run.resume_at ? String(run.resume_at) : '';
+  var resumeAt = resumeAtRaw ? formatRecentRunDisplayTime(resumeAtRaw) : '—';
+  var waitingReasonRaw = run && run.waiting_reason ? String(run.waiting_reason) : '';
+  var waitingReasonMap = {
+    waiting_for_delay: 'Scheduled Delay',
+    waiting_for_acceptance: 'Awaiting Acceptance'
+  };
+  var waitingReason = waitingReasonMap[waitingReasonRaw] || (waitingReasonRaw ? waitingReasonRaw.replace(/_/g, ' ') : '—');
+  var nextActionRaw = run && run.next_action && typeof run.next_action === 'object'
+    ? (run.next_action.type || run.next_action.node_id || '—')
+    : '—';
+  var resumeTs = Date.parse(resumeAtRaw);
+  return {
+    leadUrl: leadUrl,
+    status: status,
+    resumeAt: resumeAt,
+    resumeAtRaw: resumeAtRaw,
+    resumeTs: isNaN(resumeTs) ? Number.MAX_SAFE_INTEGER : resumeTs,
+    waitingReason: waitingReason,
+    nextAction: nextActionRaw,
+    nextActionLabel: mapActionTypeToLabel(nextActionRaw)
+  };
+}
+
+var __runsUnifiedState = {
+  view: 'recent',
+  upcomingRows: [],
+  recentRows: []
+};
+
+function mapUnifiedUpcomingRun(run){
+  var lead = run && run.lead && typeof run.lead === 'object' ? run.lead : {};
+  var leadUrl = lead.url || (run && run.lead_url) || '';
+  var resumeAtRaw = run && run.resume_at ? String(run.resume_at) : '';
+  var nextAction = run && run.next_action && typeof run.next_action === 'object'
+    ? (run.next_action.type || run.next_action.node_id || '—')
+    : '—';
+  var sortTs = Date.parse(resumeAtRaw);
+  return {
+    lead: formatLead(leadUrl),
+    leadFull: leadUrl || '—',
+    status: 'waiting',
+    action: mapActionTypeToLabel(nextAction),
+    time: resumeAtRaw ? formatRecentRunDisplayTime(resumeAtRaw) : '—',
+    result: '—',
+    sortTs: isNaN(sortTs) ? Number.MAX_SAFE_INTEGER : sortTs
+  };
+}
+
+function mapUnifiedRecentRun(run){
+  var lead = run && run.lead && typeof run.lead === 'object' ? run.lead : {};
+  var leadUrl = lead.url || (run && run.lead_url) || (run && run.profile_url) || '';
+  var lastActionTs = run && run.last_action_ts ? String(run.last_action_ts) : '';
+  var updatedAt = run && run.updated_at ? String(run.updated_at) : '';
+  var timeRaw = lastActionTs || updatedAt;
+  var sortTs = Date.parse(timeRaw);
+  var ok = run && typeof run.last_action_ok === 'boolean' ? run.last_action_ok : null;
+  return {
+    lead: formatLead(leadUrl),
+    leadFull: leadUrl || '—',
+    status: (run && run.status ? String(run.status) : '—'),
+    action: run && run.last_action_label ? String(run.last_action_label) : '—',
+    time: timeRaw ? formatRecentRunDisplayTime(timeRaw) : '—',
+    result: ok === true ? '✅' : (ok === false ? '❌' : '-'),
+    sortTs: isNaN(sortTs) ? 0 : sortTs
+  };
+}
+
+function renderRunsMergedTable(){
+  var bodyEl = document.getElementById('runs-merged-body');
+  if (!bodyEl) return;
+  var rows = __runsUnifiedState.view === 'recent'
+    ? (__runsUnifiedState.recentRows || [])
+    : (__runsUnifiedState.upcomingRows || []);
+  if (!rows.length) {
+    var emptyText = __runsUnifiedState.view === 'recent'
+      ? 'No recent runs available.'
+      : 'No upcoming runs scheduled.';
+    bodyEl.innerHTML = '<tr><td colspan="5" class="automation-empty-row">' + emptyText + '</td></tr>';
+    return;
+  }
+  bodyEl.innerHTML = rows.map(function(row){
+    var leadCell = '-';
+    if (row.leadFull && row.leadFull !== '—') {
+      var href = /^https?:\/\//i.test(String(row.leadFull)) ? String(row.leadFull) : ('https://' + String(row.leadFull));
+      leadCell = '<a class="lead-link runs-lead" href="' + escapeHtml(href) + '" target="_blank" rel="noopener noreferrer" title="' + escapeHtml(String(row.leadFull)) + '">' + escapeHtml(row.lead) + '</a>';
+    }
+    return (
+      '<tr>' +
+        '<td>' + leadCell + '</td>' +
+        '<td><span class="upcoming-runs-status-pill">' + escapeHtml(String(row.status || '—')) + '</span></td>' +
+        '<td>' + escapeHtml(row.action || '—') + '</td>' +
+        '<td>' + escapeHtml(row.time || '—') + '</td>' +
+        '<td>' + escapeHtml(row.result || '-') + '</td>' +
+      '</tr>'
+    );
+  }).join('');
+}
+
+function setRunsView(view){
+  var nextView = view === 'recent' ? 'recent' : 'upcoming';
+  __runsUnifiedState.view = nextView;
+  var upcomingBtn = document.getElementById('runs-toggle-upcoming');
+  var recentBtn = document.getElementById('runs-toggle-recent');
+  if (upcomingBtn) {
+    var activeUpcoming = nextView === 'upcoming';
+    upcomingBtn.classList.toggle('is-active', activeUpcoming);
+    upcomingBtn.setAttribute('aria-selected', activeUpcoming ? 'true' : 'false');
+  }
+  if (recentBtn) {
+    var activeRecent = nextView === 'recent';
+    recentBtn.classList.toggle('is-active', activeRecent);
+    recentBtn.setAttribute('aria-selected', activeRecent ? 'true' : 'false');
+  }
+  renderRunsMergedTable();
+}
+
+function hydrateRunsMergedSection(data){
+  var recentRuns = Array.isArray(data && data.recent_runs) ? data.recent_runs : [];
+  var upcomingRuns = Array.isArray(data && data.upcoming_runs) ? data.upcoming_runs : [];
+  __runsUnifiedState.recentRows = recentRuns.map(mapUnifiedRecentRun).sort(function(a, b){ return b.sortTs - a.sortTs; });
+  __runsUnifiedState.upcomingRows = upcomingRuns.map(mapUnifiedUpcomingRun).sort(function(a, b){ return a.sortTs - b.sortTs; });
+  if (__runsUnifiedState.view !== 'upcoming' && __runsUnifiedState.view !== 'recent') {
+    __runsUnifiedState.view = 'upcoming';
+  }
+  setRunsView(__runsUnifiedState.view);
+}
+
+function applyCampaignLeadDistribution(campaign){
+  var el = document.getElementById('campaign-lead-distribution');
+  if (!el) return;
+  var totalEl = document.getElementById('campaign-lead-distribution-total');
+  var flagsEl = document.getElementById('campaign-lead-distribution-flags');
+  var barEl = document.getElementById('campaign-lead-distribution-bar');
+  var counters = campaign && campaign.counters && typeof campaign.counters === 'object' ? campaign.counters : {};
+  var queued = toNumberOrZero(counters.queued);
+  var waiting = toNumberOrZero(counters.waiting);
+  var running = toNumberOrZero(counters.running);
+  var completed = toNumberOrZero(counters.completed);
+  var failed = toNumberOrZero(counters.failed);
+  var cancelled = toNumberOrZero(counters.cancelled);
+  var total = queued + waiting + running + completed + failed + cancelled;
+  var waitingClass = waiting > 0 ? ' automation-status-badge--waiting' : '';
+  var failedClass = failed > 0 ? ' automation-status-badge--failed' : '';
+  el.innerHTML =
+    '<span class="automation-status-badge">Queued: ' + formatNumberForUi(queued) + '</span>' +
+    '<span class="automation-status-badge' + waitingClass + '">Waiting: ' + formatNumberForUi(waiting) + '</span>' +
+    '<span class="automation-status-badge">Running: ' + formatNumberForUi(running) + '</span>' +
+    '<span class="automation-status-badge">Completed: ' + formatNumberForUi(completed) + '</span>' +
+    '<span class="automation-status-badge' + failedClass + '">Failed: ' + formatNumberForUi(failed) + '</span>' +
+    '<span class="automation-status-badge">Cancelled: ' + formatNumberForUi(cancelled) + '</span>';
+  if (totalEl) totalEl.textContent = 'Total: ' + formatNumberForUi(total);
+  if (flagsEl) {
+    var flags = [];
+    if (waiting > 0) flags.push('⚠️ Waiting: ' + formatNumberForUi(waiting));
+    if (failed > 0) flags.push('🔴 Failed: ' + formatNumberForUi(failed));
+    flagsEl.textContent = flags.join('   ');
+  }
+  if (barEl) {
+    var segments = [
+      { key: 'queued', label: 'Queued', value: queued },
+      { key: 'waiting', label: 'Waiting', value: waiting },
+      { key: 'running', label: 'Running', value: running },
+      { key: 'completed', label: 'Completed', value: completed },
+      { key: 'failed', label: 'Failed', value: failed },
+      { key: 'cancelled', label: 'Cancelled', value: cancelled }
+    ];
+    if (total <= 0) {
+      barEl.innerHTML = '<span class="automation-lead-segment automation-lead-segment--empty" style="width:100%;">No leads</span>';
+    } else {
+      barEl.innerHTML = segments.filter(function(seg){ return seg.value > 0; }).map(function(seg){
+        var pct = (seg.value / total) * 100;
+        return '<span class="automation-lead-segment automation-lead-segment--' + seg.key + '" style="width:' + pct.toFixed(2) + '%;" title="' + seg.label + ': ' + formatNumberForUi(seg.value) + ' (' + pct.toFixed(1) + '%)"></span>';
+      }).join('');
+    }
+  }
+}
+
+function applyCampaignSchedule(schedule, upcomingRuns){
+  var eligibleEl = document.getElementById('campaign-schedule-eligible-badge');
+  var timezoneEl = document.getElementById('campaign-schedule-timezone');
+  var nextRunEl = document.getElementById('campaign-schedule-next-run');
+  var payload = schedule && typeof schedule === 'object' ? schedule : {};
+  var runs = Array.isArray(upcomingRuns) ? upcomingRuns : [];
+  var nextRunRaw = payload.next_eligible_utc || '';
+  if (!nextRunRaw && runs.length) {
+    var sortedRuns = runs.slice().sort(function(a, b){
+      var aTs = Date.parse(a && a.resume_at ? String(a.resume_at) : '');
+      var bTs = Date.parse(b && b.resume_at ? String(b.resume_at) : '');
+      if (isNaN(aTs)) aTs = Number.MAX_SAFE_INTEGER;
+      if (isNaN(bTs)) bTs = Number.MAX_SAFE_INTEGER;
+      return aTs - bTs;
+    });
+    nextRunRaw = sortedRuns[0] && sortedRuns[0].resume_at ? String(sortedRuns[0].resume_at) : '';
+  }
+  var appState = getAppState() || {};
+  var campaignLifecycleStatus = String(appState.campaignStatus || '').trim().toLowerCase();
+  var campaignIsActive = campaignLifecycleStatus === 'active';
+  var eligible = payload.eligible_now === true && campaignIsActive;
+  var hasEligible = payload.eligible_now === true || payload.eligible_now === false;
+  if (eligibleEl) {
+    if (!hasEligible) {
+      eligibleEl.textContent = '—';
+      eligibleEl.className = 'campaign-schedule-badge campaign-schedule-badge--unknown';
+      eligibleEl.title = 'Execution status unavailable';
+    } else if (!campaignIsActive) {
+      eligibleEl.textContent = '⚪ Idle';
+      eligibleEl.className = 'campaign-schedule-badge campaign-schedule-badge--idle';
+      eligibleEl.title = 'Campaign is not currently scheduled to execute';
+    } else if (eligible) {
+      eligibleEl.textContent = '🟢 Executing Now';
+      eligibleEl.className = 'campaign-schedule-badge campaign-schedule-badge--active';
+      eligibleEl.title = 'Campaign is currently within execution window';
+    } else if (nextRunRaw) {
+      eligibleEl.textContent = '🟡 Scheduled';
+      eligibleEl.className = 'campaign-schedule-badge campaign-schedule-badge--scheduled';
+      eligibleEl.title = 'Campaign will run at the next scheduled time';
+    } else {
+      eligibleEl.textContent = '⚪ Idle';
+      eligibleEl.className = 'campaign-schedule-badge campaign-schedule-badge--idle';
+      eligibleEl.title = 'Campaign is not currently scheduled to execute';
+    }
+  }
+  if (timezoneEl) {
+    timezoneEl.textContent = payload.timezone ? String(payload.timezone) : '—';
+    timezoneEl.title = payload.timezone ? ('Timezone: ' + String(payload.timezone)) : 'Timezone unavailable';
+  }
+  if (nextRunEl) {
+    nextRunEl.textContent = nextRunRaw ? formatRecentRunDisplayTime(nextRunRaw) : 'No upcoming runs scheduled';
+  }
+}
+
+function getCampaignLifecycleBadgeMeta(status){
+  var raw = String(status || '').trim().toLowerCase();
+  if (raw === 'completed') {
+    return {
+      className: 'badge badge--campaign-completed',
+      dotClass: 'badge-dot badge-dot--campaign-completed',
+      label: '🟣 Completed',
+      title: 'Campaign has completed all configured work'
+    };
+  }
+  if (raw === 'cancelled' || raw === 'canceled' || raw === 'stopped' || raw === 'closed') {
+    return {
+      className: 'badge badge--campaign-stopped',
+      dotClass: 'badge-dot badge-dot--campaign-stopped',
+      label: '🔴 Stopped',
+      title: 'Campaign has been stopped'
+    };
+  }
+  if (raw === 'paused' || raw === 'inactive') {
+    return {
+      className: 'badge badge--campaign-paused',
+      dotClass: 'badge-dot badge-dot--campaign-paused',
+      label: '⚪ Paused',
+      title: 'Campaign is paused and not processing'
+    };
+  }
+  return {
+    className: 'badge badge--campaign-active',
+    dotClass: 'badge-dot badge-dot--campaign-active',
+    label: 'Campaign Active',
+    title: 'Campaign is enabled and ready to run'
+  };
+}
+
+function applyCampaignLifecycleBadge(status){
+  var meta = getCampaignLifecycleBadgeMeta(status);
+  var dashBadge = document.getElementById('dashboard-status-badge');
+  var ipBadge = document.getElementById('ip-monitoring-status-badge');
+  if (dashBadge) {
+    dashBadge.className = meta.className;
+    dashBadge.innerHTML = '<span class="' + meta.dotClass + '"></span>' + meta.label;
+    dashBadge.title = meta.title;
+  }
+  if (ipBadge && dashBadge) {
+    ipBadge.className = dashBadge.className;
+    ipBadge.innerHTML = dashBadge.innerHTML;
+    ipBadge.title = dashBadge.title;
+  }
+}
+
+function applyUpcomingRunsTable(upcomingRuns){
+  var bodyEl = document.getElementById('upcoming-runs-body');
+  if (!bodyEl) return;
+  var rows = Array.isArray(upcomingRuns) ? upcomingRuns.map(mapUpcomingRunRow) : [];
+  rows.sort(function(a, b){ return a.resumeTs - b.resumeTs; });
+  var signature = JSON.stringify(rows.map(function(r){
+    return [r.leadUrl, r.status, r.resumeAtRaw, r.waitingReason, r.nextAction];
+  }));
+  if (bodyEl.getAttribute('data-signature') === signature) return;
+  bodyEl.setAttribute('data-signature', signature);
+  if (!rows.length) {
+    bodyEl.innerHTML = '<tr><td colspan="5" class="automation-empty-row">No upcoming runs scheduled.</td></tr>';
+    return;
+  }
+  bodyEl.innerHTML = rows.map(function(row){
+    var lead = formatLeadForDisplay(row.leadUrl);
+    return (
+      '<tr>' +
+        '<td class="upcoming-runs-lead-cell"><span title="' + escapeHtml(lead.full) + '">' + escapeHtml(lead.text) + '</span></td>' +
+        '<td><span class="upcoming-runs-status-pill">' + escapeHtml(row.status) + '</span></td>' +
+        '<td>' + escapeHtml(row.resumeAt) + '</td>' +
+        '<td>' + escapeHtml(row.waitingReason) + '</td>' +
+        '<td><span class="upcoming-runs-action-label" title="' + escapeHtml(String(row.nextAction)) + '">' + escapeHtml(row.nextActionLabel) + '</span></td>' +
+      '</tr>'
+    );
+  }).join('');
 }
 
 function applyCampaignDetailActivitySummary(data, campaign){
@@ -1176,6 +1868,9 @@ function applyCampaignDetailActivitySummary(data, campaign){
   var connected = toNumberOrZero(distinct.connected);
   var replied = toNumberOrZero(distinct.replied);
   var recentRuns = Array.isArray(data && data.recent_runs) ? data.recent_runs : [];
+  if (typeof console !== 'undefined' && typeof console.log === 'function') {
+    console.log('Recent Runs API:', recentRuns);
+  }
   var recentRows = mapCampaignRecentRuns(recentRuns);
   var replyRate = messagesSent > 0 ? ((replied / messagesSent) * 100) : 0;
   var acceptanceRate = connectionsSent > 0 ? ((connected / connectionsSent) * 100) : 0;
@@ -1190,6 +1885,14 @@ function applyCampaignDetailActivitySummary(data, campaign){
   if (DATA['recent-runs']) {
     DATA['recent-runs'].rows = recentRows;
     DATA['recent-runs'].sub = recentRows.length + ' actions from campaign detail';
+    DATA['recent-runs'].summary = [
+      { label: 'Total runs', val: recentRows.length },
+      { label: 'Completed', val: recentRows.filter(function(r){ return String(r.status).toLowerCase() === 'completed'; }).length },
+      { label: 'Queued', val: recentRows.filter(function(r){ return String(r.status).toLowerCase() === 'queued'; }).length },
+      { label: 'Failed', val: recentRows.filter(function(r){ return String(r.status).toLowerCase() === 'failed'; }).length }
+    ];
+    DATA['recent-runs'].filters = ['All', 'Completed', 'Queued', 'Failed', 'Waiting', 'Running'];
+    DATA['recent-runs'].cols = ['Lead', 'Status', 'Last Action', 'Result', 'Time'];
   }
   if (DATA['profile-views']) {
     DATA['profile-views'].summary = [{ label: 'Views', val: views }];
@@ -1214,6 +1917,10 @@ function applyCampaignDetailActivitySummary(data, campaign){
       { label: 'Accept rate', val: acceptanceRate.toFixed(1) + '%' }
     ];
   }
+  var upcomingRuns = data && Array.isArray(data.upcoming_runs) ? data.upcoming_runs : [];
+  applyCampaignLeadDistribution(campaign);
+  hydrateRunsMergedSection(data || {});
+  applyCampaignSchedule(data && data.schedule ? data.schedule : {}, upcomingRuns);
   initDashboardRunTracking();
 }
 
@@ -1239,6 +1946,7 @@ function applyCampaignDetailCards(campaign){
   if (progressFillEl) progressFillEl.style.width = progressPct == null ? '0%' : (progressPct + '%');
   if (updatedDateEl) updatedDateEl.textContent = updated.dateText;
   if (updatedTimeEl) updatedTimeEl.textContent = updated.timeText;
+  applyCampaignLifecycleBadge(campaign.status);
 }
 
 function hydrateCampaignDetailCardsFromApi(opts){
@@ -1254,6 +1962,7 @@ function hydrateCampaignDetailCardsFromApi(opts){
     applyCampaignDetailCards(cached.campaign || {});
     applyCampaignDetailActivitySummary(cached.data || {}, cached.campaign || {});
     hydrateProfileHealthFromApi(ctx, { silentError: true });
+    hydrateCampaignIpMonitoringFromApi(ctx);
     hydrateFailedActionsFromApi(ctx);
     return Promise.resolve(true);
   }
@@ -1278,6 +1987,7 @@ function hydrateCampaignDetailCardsFromApi(opts){
     applyCampaignDetailActivityChart(campaign);
     applyCampaignDetailActivitySummary(data || {}, campaign);
     hydrateProfileHealthFromApi(ctx, { silentError: true });
+    hydrateCampaignIpMonitoringFromApi(ctx);
     hydrateFailedActionsFromApi(ctx);
     __campaignDetailCardsCache[cacheKey] = { at: Date.now(), campaign: campaign, data: data || {} };
     return true;
@@ -1292,6 +2002,7 @@ function hydrateCampaignDetailCardsFromApi(opts){
     setStatCardValue('accepted-profiles', 0, 'Unable to load metrics');
     setStatCardValue('recent-runs', 0, 'Unable to load metrics');
     hydrateProfileHealthFromApi(ctx, { silentError: true });
+    hydrateCampaignIpMonitoringFromApi(ctx);
     hydrateFailedActionsFromApi(ctx);
     return false;
   }).finally(function(){
@@ -1317,13 +2028,31 @@ function mapApiCampaign(item){
   var raw = loadAppStateRaw() || {};
   var defaultEmail = item.user_id || item.userId || raw.lastCampaignApiUserId || raw.aiSdrEmail || '';
   var defaultEnv = setupSelectedEnv || (getAppState() && getAppState().environment) || raw.environment || 'Dev';
+  var campaignNode = item && item.campaign && typeof item.campaign === 'object' ? item.campaign : {};
+  var actionCounts = campaignNode.action_counts && typeof campaignNode.action_counts === 'object'
+    ? campaignNode.action_counts
+    : (item.action_counts && typeof item.action_counts === 'object' ? item.action_counts : {});
+  var distinct = actionCounts.distinct && typeof actionCounts.distinct === 'object' ? actionCounts.distinct : {};
+  if (typeof console !== 'undefined' && typeof console.log === 'function') {
+    console.log('Campaign:', item.campaign_id || item.campaignId || item.id || '');
+    console.log('Activity Counts:', distinct);
+  }
   return {
     campaignId: item.campaign_id || item.campaignId || item.id || '',
     campaignName: item.campaign_name || item.campaignName || item.name || '',
     aiSdrEmail: item.ai_sdr_email || item.aiSdrEmail || item.email || defaultEmail || '',
     environment: item.environment || defaultEnv || 'Dev',
     status: item.status || 'Active',
-    createdAt: item.created_at || item.createdAt || new Date().toISOString()
+    createdAt: item.created_at || item.createdAt || new Date().toISOString(),
+    actionCountsDistinct: {
+      views: toNumberOrZero(distinct.views),
+      connections_sent: toNumberOrZero(distinct.connections_sent),
+      messages_sent: toNumberOrZero(distinct.messages_sent),
+      like_post: toNumberOrZero(distinct.like_post),
+      connected: toNumberOrZero(distinct.connected),
+      not_connected_yet: toNumberOrZero(distinct.not_connected_yet),
+      replied: toNumberOrZero(distinct.replied)
+    }
   };
 }
 
@@ -1492,12 +2221,18 @@ function mapFailedActionDbItem(item, groupedCounts){
 function hydrateFailedActionsFromApi(ctx){
   if (!window.AppApiIntegration || typeof window.AppApiIntegration.getFailedActionsScreenshotsDb !== 'function') return Promise.resolve(false);
   var context = ctx || getCampaignDetailFetchContext();
-  if (!context || !context.email) {
+  if (!context || !context.email || !context.campaign_id) {
     FAILED_ACTIONS.length = 0;
+    failedActionsEmptyMessage = 'Select a campaign to view failure screenshots.';
     renderFailedActions();
     return Promise.resolve(false);
   }
-  return window.AppApiIntegration.getFailedActionsScreenshotsDb({ email: context.email, env: context.env, limit: 100 }).then(function(data){
+  return window.AppApiIntegration.getFailedActionsScreenshotsDb({
+    email: context.email,
+    env: context.env,
+    limit: 100,
+    campaign_id: context.campaign_id
+  }).then(function(data){
     var items = extractFailedActionsItems(data);
     var sorted = items.slice().sort(function(a, b){
       var ta = Date.parse(a && a.timestamp ? String(a.timestamp) : '');
@@ -1517,10 +2252,14 @@ function hydrateFailedActionsFromApi(ctx){
     });
     FAILED_ACTIONS.length = 0;
     mapped.forEach(function(row){ FAILED_ACTIONS.push(row); });
+    failedActionsEmptyMessage = mapped.length
+      ? 'No failures found for this campaign yet.'
+      : 'No failed actions were recorded for this campaign.';
     renderFailedActions();
     return true;
   }).catch(function(){
     FAILED_ACTIONS.length = 0;
+    failedActionsEmptyMessage = 'Unable to load failed actions for this campaign right now.';
     renderFailedActions();
     return false;
   });
@@ -1541,47 +2280,11 @@ function classifyFailureForItem(item){
   return { code: 'OTHER', severity: 'minor', label: 'Other', type: 'Other' };
 }
 
-function updateMonitoringInsightWidgets(failedActions, runState, apiRuns){
-  if (!window.AppMonitoringMetrics) return;
-  var mm = AppMonitoringMetrics;
-
-  var topList = document.getElementById('top-failures-list');
-  if (topList && typeof mm.aggregateTopFailureTypes === 'function') {
-    var agg = mm.aggregateTopFailureTypes(failedActions || [], 2);
-    if (agg.total === 0) {
-      topList.innerHTML = '<li class="mw-empty">No failed actions in view.</li>';
-    } else {
-      topList.innerHTML = agg.top.map(function(row){
-        return '<li><span class="mw-label">' + escapeHtml(row.label) + '</span> <span class="mw-val">' +
-          row.percent.toFixed(0) + '% (' + row.count + ')</span></li>';
-      }).join('');
-      if (agg.top.length === 0) {
-        topList.innerHTML = '<li class="mw-empty">—</li>';
-      }
-    }
-  }
-
-  var rhSrc = document.getElementById('run-health-source');
-  var rhP = document.getElementById('rh-processed');
-  var rhS = document.getElementById('rh-success');
-  var rhF = document.getElementById('rh-failed');
-  var rhRate = document.getElementById('rh-rate');
-  if (typeof mm.summarizeRunHealth === 'function') {
-    var sum = mm.summarizeRunHealth(apiRuns || null, runState || {});
-    if (rhSrc) rhSrc.textContent = sum.source === 'api' ? 'From runs API (merged with local)' : 'From last stored runs';
-    if (rhP) rhP.textContent = sum.processed > 0 ? String(sum.processed) : '—';
-    if (rhS) rhS.textContent = String(sum.successRuns);
-    if (rhF) rhF.textContent = String(sum.failedRuns);
-    if (rhRate) rhRate.textContent = sum.successRate == null ? '—' : (sum.successRate * 100).toFixed(1) + '%';
-  }
-}
-
 function refreshDashboardMonitoring(){
   if (!window.AppMonitoringMetrics) return;
   try {
     var dataMap = typeof DATA !== 'undefined' && DATA ? DATA : {};
     var failedCount = typeof FAILED_ACTIONS !== 'undefined' && Array.isArray(FAILED_ACTIONS) ? FAILED_ACTIONS.length : 0;
-    var failedActions = typeof FAILED_ACTIONS !== 'undefined' && Array.isArray(FAILED_ACTIONS) ? FAILED_ACTIONS : [];
     var runState = typeof getRunTrackingState === 'function' ? getRunTrackingState(getRunTrackingCampaignId()) : {};
     var total = AppMonitoringMetrics.computeTotalActionsFromRunState(runState);
     var rates = AppMonitoringMetrics.computeRates(total, failedCount);
@@ -1591,8 +2294,6 @@ function refreshDashboardMonitoring(){
       rates: rates,
       failedCount: failedCount
     });
-
-    updateMonitoringInsightWidgets(failedActions, runState, window.__lastRunsApiData || null);
 
     var srEl = document.querySelector('#screen-dashboard [data-stat-key="success-rate"] .stat-num');
     var frEl = document.querySelector('#screen-dashboard [data-stat-key="failure-rate"] .stat-num');
@@ -1643,13 +2344,6 @@ function refreshDashboardMonitoring(){
       });
     }
 
-    if (window.AppRunTrackingService && typeof window.AppRunTrackingService.fetchRuns === 'function') {
-      var cid = typeof getRunTrackingCampaignId === 'function' ? getRunTrackingCampaignId() : '';
-      window.AppRunTrackingService.fetchRuns({ campaign_id: cid, limit: 50 }).then(function(apiRuns){
-        window.__lastRunsApiData = apiRuns;
-        updateMonitoringInsightWidgets(failedActions, runState, apiRuns);
-      });
-    }
   } catch (err) {
     if (window.AppLogger && typeof window.AppLogger.warn === 'function') {
       window.AppLogger.warn('MONITORING_REFRESH_ERR', { message: err && err.message ? err.message : String(err) });
@@ -1657,7 +2351,7 @@ function refreshDashboardMonitoring(){
   }
 }
 
-function refreshSessionNetworkPanel(){
+function refreshSessionNetworkPanel(prefetchedData, ctx){
   if (!window.AppSessionNetworkPanel || typeof window.AppSessionNetworkPanel.renderSessionNetworkPanel !== 'function') return;
   var esc = typeof escapeHtml === 'function' ? escapeHtml : function(s){
     var d = document.createElement('div');
@@ -1665,22 +2359,37 @@ function refreshSessionNetworkPanel(){
     return d.innerHTML;
   };
   try {
-    var useApi = window.AppConfig && window.AppConfig.useApi === true;
+    var context = ctx || getCampaignDetailFetchContext();
+    if (prefetchedData) {
+      window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', prefetchedData, {
+        escapeHtml: esc,
+        loaded: true,
+        selectedCampaignId: context && context.campaign_id ? context.campaign_id : ''
+      });
+      return;
+    }
+    var useApi = !!(window.AppConfig && window.AppConfig.useApi);
     if (!useApi) {
       window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', null, { escapeHtml: esc, loaded: true });
       return;
     }
     window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', null, { escapeHtml: esc, loaded: false });
-    if (!window.AppApiIntegration || typeof window.AppApiIntegration.getSessionInfo !== 'function') {
+    if (!window.AppApiIntegration || typeof window.AppApiIntegration.getCampaignIps !== 'function') {
       window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', null, { escapeHtml: esc, loaded: true });
       return;
     }
-    var cid = typeof getRunTrackingCampaignId === 'function' ? getRunTrackingCampaignId() : '';
-    window.AppApiIntegration.getSessionInfo({ campaign_id: cid }).then(function(raw){
+    window.AppApiIntegration.getCampaignIps({
+      email: context && context.email ? context.email : '',
+      env: context && context.env ? context.env : ''
+    }).then(function(raw){
       if (window.AppLogger && typeof window.AppLogger.info === 'function') {
-        window.AppLogger.info('SESSION_INFO_FETCH', { ok: raw != null, campaign_id: cid });
+        window.AppLogger.info('CAMPAIGN_IPS_FETCH', { ok: raw != null, campaign_id: context && context.campaign_id ? context.campaign_id : '' });
       }
-      window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', raw, { escapeHtml: esc, loaded: true });
+      window.AppSessionNetworkPanel.renderSessionNetworkPanel('session-network-panel', raw, {
+        escapeHtml: esc,
+        loaded: true,
+        selectedCampaignId: context && context.campaign_id ? context.campaign_id : ''
+      });
     });
   } catch (e) {
     if (window.AppLogger && typeof window.AppLogger.warn === 'function') {
@@ -1841,21 +2550,7 @@ function hydrateOverviewFromApi(){
       initActivityChart();
     }
 
-    if (Array.isArray(data.recent_runs_summary) && DATA['recent-runs']) {
-      DATA['recent-runs'].rows = data.recent_runs_summary.map(function(r){
-        return {
-          name: r.lead || '',
-          initials: 'RR',
-          color: '#E6F1FB',
-          textColor: '#185FA5',
-          url: '',
-          action: r.action || '',
-          status: r.status || '',
-          time: r.time || ''
-        };
-      });
-      initDashboardRunTracking();
-    }
+    // Recent runs must come only from /orch/campaign/detail -> recent_runs.
 
     var failedItems = Array.isArray(data.failed_actions_summary)
       ? data.failed_actions_summary
@@ -1889,6 +2584,256 @@ function hydrateOverviewFromApi(){
 }
 
 function hydrateDetailFromApi(key){
+  function toInitials(name){
+    var raw = String(name || '').trim();
+    if (!raw) return '--';
+    var parts = raw.split(/\s+/).filter(Boolean);
+    if (!parts.length) return '--';
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+  }
+  function formatActivityTime(raw){
+    var ts = String(raw || '').trim();
+    if (!ts) return '—';
+    var normalized = ts;
+    if (window.AppUtilsFormatters && typeof window.AppUtilsFormatters.normalizeTimestampToIso === 'function') {
+      normalized = window.AppUtilsFormatters.normalizeTimestampToIso(ts) || ts;
+    }
+    var d = new Date(normalized);
+    if (isNaN(d.getTime())) return ts;
+    var datePart = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    var timePart = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    return datePart + ' • ' + timePart;
+  }
+  function normalizeUrl(raw){
+    var v = String(raw || '').trim();
+    if (!v) return '';
+    return /^https?:\/\//i.test(v) ? v : ('https://' + v);
+  }
+  function getCampaignActivity(actionType, label){
+    if (!window.AppApiIntegration || typeof window.AppApiIntegration.getCampaignActivityAll !== 'function') return Promise.resolve(null);
+    var context = getCampaignDetailFetchContext();
+    var payload = {
+      token: (window.AppConfig && window.AppConfig.campaignListToken) ? window.AppConfig.campaignListToken : '',
+      email: context.email,
+      action: actionType,
+      campaign_id: context.campaign_id,
+      limit: 100,
+      offset: 0,
+      include_timeline: false,
+      include_debug: false,
+      env: context.env
+    };
+    if (typeof console !== 'undefined' && typeof console.log === 'function') {
+      console.log('Fetching ' + String(label || actionType || 'activity') + '...');
+      console.log('Payload:', payload);
+    }
+    return window.AppApiIntegration.getCampaignActivityAll(payload).then(function(data){
+      if (typeof console !== 'undefined' && typeof console.log === 'function') {
+        console.log('Response:', data);
+      }
+      return data;
+    });
+  }
+
+  if (key === 'connections-sent') {
+    setGlobalLoading(true, 'Loading connections...');
+    return getCampaignActivity('send_connect', 'connections sent').then(function(data){
+      if (!DATA[key]) return false;
+      var leads = Array.isArray(data && data.leads) ? data.leads : [];
+      var total = Number(data && data.total);
+      var count = Number(data && data.count);
+      var hasMore = !!(data && data.has_more);
+      DATA[key].title = 'Connections Sent';
+      DATA[key].sub = leads.length ? (leads.length + ' records loaded') : 'No connections sent yet';
+      DATA[key].summary = [
+        { label: 'Total Connections Sent', val: isNaN(total) ? leads.length : total },
+        { label: 'Showing', val: isNaN(count) ? leads.length : count },
+        { label: 'Has more', val: hasMore ? 'Yes' : 'No' }
+      ];
+      DATA[key].filters = ['All'];
+      DATA[key].cols = ['Name', 'LinkedIn URL', 'Sent at', 'Campaign Status'];
+      DATA[key].rows = leads.map(function(item){
+        var leadName = String(item && item.lead_name ? item.lead_name : '').trim();
+        var linkRaw = String(item && item.lead_url ? item.lead_url : '').trim();
+        return {
+          name: leadName || '—',
+          initials: toInitials(leadName),
+          color: '#E6F1FB',
+          textColor: '#185FA5',
+          url: normalizeUrl(linkRaw),
+          status: String(item && item.campaign_status ? item.campaign_status : '—'),
+          action: '',
+          time: formatActivityTime(item && item.ts)
+        };
+      });
+      return true;
+    }).catch(function(){
+      if (DATA[key]) {
+        DATA[key].title = 'Connections Sent';
+        DATA[key].sub = 'No connections sent yet';
+        DATA[key].summary = [{ label: 'Total Connections Sent', val: 0 }];
+        DATA[key].filters = ['All'];
+        DATA[key].cols = ['Name', 'LinkedIn URL', 'Sent at', 'Campaign Status'];
+        DATA[key].rows = [];
+      }
+      showGlobalError('Unable to load connections sent right now.');
+      return false;
+    }).finally(function(){
+      setGlobalLoading(false);
+    });
+  }
+
+  if (key === 'profile-views') {
+    setGlobalLoading(true, 'Loading profile views...');
+    return getCampaignActivity('view_profile', 'profile views').then(function(data){
+      if (!DATA[key]) return false;
+      var leads = Array.isArray(data && data.leads) ? data.leads.slice() : [];
+      leads.sort(function(a, b){
+        var at = Date.parse((a && a.ts) ? String(a.ts) : '');
+        var bt = Date.parse((b && b.ts) ? String(b.ts) : '');
+        if (isNaN(at)) at = 0;
+        if (isNaN(bt)) bt = 0;
+        return bt - at;
+      });
+      var total = Number(data && data.total);
+      var resolvedTotal = isNaN(total) ? leads.length : total;
+      DATA[key].title = 'Profile Views';
+      DATA[key].sub = resolvedTotal + ' profiles viewed this campaign';
+      DATA[key].summary = [{ label: 'Total Profile Views', val: resolvedTotal }];
+      DATA[key].filters = [];
+      DATA[key].cols = ['Lead', 'Profile URL', 'Viewed At'];
+      DATA[key].rows = leads.map(function(item){
+        var leadName = String(item && item.lead_name ? item.lead_name : '').trim();
+        var linkRaw = String(item && item.lead_url ? item.lead_url : '').trim();
+        return {
+          name: leadName || '—',
+          initials: toInitials(leadName),
+          color: '#EEEDFE',
+          textColor: '#534AB7',
+          url: normalizeUrl(linkRaw),
+          action: '',
+          status: '',
+          time: formatActivityTime(item && item.ts)
+        };
+      });
+      return true;
+    }).catch(function(){
+      if (DATA[key]) {
+        DATA[key].title = 'Profile Views';
+        DATA[key].sub = '0 profiles viewed this campaign';
+        DATA[key].summary = [{ label: 'Total Profile Views', val: 0 }];
+        DATA[key].filters = [];
+        DATA[key].cols = ['Lead', 'Profile URL', 'Viewed At'];
+        DATA[key].rows = [];
+      }
+      showGlobalError('Unable to load profile views right now.');
+      return false;
+    }).finally(function(){
+      setGlobalLoading(false);
+    });
+  }
+
+  if (key === 'posts-liked') {
+    setGlobalLoading(true, 'Loading posts liked...');
+    return getCampaignActivity('like_recent_post', 'posts liked').then(function(data){
+      if (!DATA[key]) return false;
+      var leads = Array.isArray(data && data.leads) ? data.leads.slice() : [];
+      leads.sort(function(a, b){
+        var at = Date.parse((a && a.ts) ? String(a.ts) : '');
+        var bt = Date.parse((b && b.ts) ? String(b.ts) : '');
+        if (isNaN(at)) at = 0;
+        if (isNaN(bt)) bt = 0;
+        return bt - at;
+      });
+      var total = Number(data && data.total);
+      var resolvedTotal = isNaN(total) ? leads.length : total;
+      DATA[key].title = 'Posts Liked';
+      DATA[key].sub = resolvedTotal + ' posts liked this campaign';
+      DATA[key].summary = [{ label: 'Total Posts Liked', val: resolvedTotal }];
+      DATA[key].filters = [];
+      DATA[key].cols = ['Lead', 'Profile URL', 'Liked At'];
+      DATA[key].rows = leads.map(function(item){
+        var leadName = String(item && item.lead_name ? item.lead_name : '').trim();
+        var linkRaw = String(item && item.lead_url ? item.lead_url : '').trim();
+        return {
+          name: leadName || '—',
+          initials: toInitials(leadName),
+          color: '#FAEEDA',
+          textColor: '#854F0B',
+          url: normalizeUrl(linkRaw),
+          action: '',
+          status: '',
+          time: formatActivityTime(item && item.ts)
+        };
+      });
+      return true;
+    }).catch(function(){
+      if (DATA[key]) {
+        DATA[key].title = 'Posts Liked';
+        DATA[key].sub = '0 posts liked this campaign';
+        DATA[key].summary = [{ label: 'Total Posts Liked', val: 0 }];
+        DATA[key].filters = [];
+        DATA[key].cols = ['Lead', 'Profile URL', 'Liked At'];
+        DATA[key].rows = [];
+      }
+      showGlobalError('Unable to load posts liked right now.');
+      return false;
+    }).finally(function(){
+      setGlobalLoading(false);
+    });
+  }
+
+  if (key === 'accepted-profiles') {
+    setGlobalLoading(true, 'Loading accepted profiles...');
+    return getCampaignActivity('connected', 'accepted profiles').then(function(data){
+      if (!DATA[key]) return false;
+      var leads = Array.isArray(data && data.leads) ? data.leads.slice() : [];
+      leads.sort(function(a, b){
+        var at = Date.parse((a && a.ts) ? String(a.ts) : '');
+        var bt = Date.parse((b && b.ts) ? String(b.ts) : '');
+        if (isNaN(at)) at = 0;
+        if (isNaN(bt)) bt = 0;
+        return bt - at;
+      });
+      var total = Number(data && data.total);
+      var resolvedTotal = isNaN(total) ? leads.length : total;
+      DATA[key].title = 'Accepted Profiles';
+      DATA[key].sub = resolvedTotal + ' connection requests accepted';
+      DATA[key].summary = [{ label: 'Total Accepted Profiles', val: resolvedTotal }];
+      DATA[key].filters = [];
+      DATA[key].cols = ['Lead', 'Profile URL', 'Accepted At'];
+      DATA[key].rows = leads.map(function(item){
+        var leadName = String(item && item.lead_name ? item.lead_name : '').trim();
+        var linkRaw = String(item && item.lead_url ? item.lead_url : '').trim();
+        return {
+          name: leadName || '—',
+          initials: toInitials(leadName),
+          color: '#EAF3DE',
+          textColor: '#3B6D11',
+          url: normalizeUrl(linkRaw),
+          action: '',
+          status: '',
+          time: formatActivityTime(item && item.ts)
+        };
+      });
+      return true;
+    }).catch(function(){
+      if (DATA[key]) {
+        DATA[key].title = 'Accepted Profiles';
+        DATA[key].sub = '0 connection requests accepted';
+        DATA[key].summary = [{ label: 'Total Accepted Profiles', val: 0 }];
+        DATA[key].filters = [];
+        DATA[key].cols = ['Lead', 'Profile URL', 'Accepted At'];
+        DATA[key].rows = [];
+      }
+      showGlobalError('Unable to load accepted profiles right now.');
+      return false;
+    }).finally(function(){
+      setGlobalLoading(false);
+    });
+  }
+
   if (!window.AppApiIntegration || typeof window.AppApiIntegration.getDetail !== 'function') return Promise.resolve(false);
   var campaignId = getRunTrackingCampaignId();
   setGlobalLoading(true, 'Loading detail data…');
@@ -1909,35 +2854,338 @@ function hydrateDetailFromApi(key){
   });
 }
 
-function hydrateConversationsFromApi(){
-  if (!window.AppApiIntegration || typeof window.AppApiIntegration.getConversations !== 'function') return Promise.resolve(false);
-  var campaignId = getRunTrackingCampaignId();
-  setGlobalLoading(true, 'Loading conversations…');
-  return window.AppApiIntegration.getConversations({ campaign_id: campaignId, limit: 200, offset: 0 }).then(function(data){
-    if (!data || !Array.isArray(data.items) || data.items.length === 0) return false;
-    MESSAGES_THREADS.length = 0;
-    data.items.forEach(function(c){
-      MESSAGES_THREADS.push({
-        id: c.conversation_id || c.id || ('c-' + Math.random().toString(36).slice(2, 9)),
-        name: c.name || '',
-        initials: c.initials || '',
-        color: c.color || '#E6F1FB',
-        textColor: c.text_color || c.textColor || '#185FA5',
-        preview: c.preview || '',
-        time: c.time || '',
-        online: !!c.online,
-        lastSeen: c.last_seen || c.lastSeen || '',
-        messages: Array.isArray(c.messages) ? c.messages.map(function(m){
-          return { dir: m.dir || 'recv', text: m.text || '', time: m.time || '' };
-        }) : []
-      });
+function hydrateConversationsFromApi(opts){
+  var options = opts || {};
+  var targetTab = normalizeMessagesRouteTab(options.tab || activeMessagesTab || 'sent');
+  var appendMode = !!options.append;
+  if (!window.AppApiIntegration || typeof window.AppApiIntegration.getInboxMessages !== 'function' || typeof window.AppApiIntegration.getCampaignQueuedMessages !== 'function') {
+    if (typeof console !== 'undefined' && typeof console.error === 'function') {
+      console.error('API service not available');
+    }
+    return Promise.resolve(false);
+  }
+  var context = getCampaignDetailFetchContext();
+  var palette = ['#E6F1FB', '#E1F5EE', '#EEEDFE', '#FAEEDA', '#EAF3DE', '#FBEAF0'];
+  var textPalette = ['#185FA5', '#0F6E56', '#534AB7', '#854F0B', '#3B6D11', '#993556'];
+  function toLeadSlug(raw){
+    var v = String(raw || '').trim().replace(/^https?:\/\/(www\.)?/i, '');
+    var m = v.match(/linkedin\.com\/in\/([^\/?#]+)/i);
+    return m && m[1] ? decodeURIComponent(m[1]) : v;
+  }
+  function formatMsgTime(raw){
+    if (!raw) return '—';
+    return formatRecentRunDisplayTime(raw);
+  }
+  function normalizeDirection(dir){
+    var d = String(dir || '').trim().toLowerCase();
+    return d === 'in' ? 'in' : 'out';
+  }
+  function toStatus(messages){
+    var hasIn = messages.some(function(m){ return m.dirRaw === 'in'; });
+    return hasIn ? 'replied' : 'sent';
+  }
+
+  if (typeof console !== 'undefined' && typeof console.log === 'function') {
+    console.log('Calling inbox API...');
+    console.log('Calling queued API...');
+    console.log({
+      email: context && context.email ? context.email : '',
+      token: (window.AppConfig && window.AppConfig.campaignListToken) ? '[present]' : '[missing]',
+      env: context && context.env ? context.env : '',
+      campaign_id: context && context.campaign_id ? context.campaign_id : ''
     });
-    return true;
+  }
+  if (!appendMode) {
+    var convListEl = document.getElementById('msg-conv-list');
+    if (convListEl) convListEl.innerHTML = '';
+    var threadEl = document.getElementById('msg-thread');
+    if (threadEl) threadEl.innerHTML = '';
+  }
+  function extractConversationItems(payload){
+    if (!payload) return [];
+    if (Array.isArray(payload.Messages)) return payload.Messages;
+    if (payload.data && Array.isArray(payload.data.data)) return payload.data.data;
+    if (Array.isArray(payload.data)) return payload.data;
+    if (payload.data && Array.isArray(payload.data.Messages)) return payload.data.Messages;
+    if (Array.isArray(payload.items)) return payload.items;
+    if (Array.isArray(payload.rows)) return payload.rows;
+    if (Array.isArray(payload.conversations)) return payload.conversations;
+    if (payload.result && Array.isArray(payload.result.Messages)) return payload.result.Messages;
+    return [];
+  }
+  function mapConversation(c, idx, queuedMode){
+    var leadName = String(c && (c.leadName || c.lead_name) ? (c.leadName || c.lead_name) : '').trim();
+    var leadUrlRaw = String(c && (c.leadUrl || c.lead_url || c.profile_url || c.url || '')).trim();
+    var rawMessages = Array.isArray(c && c.messages) ? c.messages : [];
+    if (!rawMessages.length && Array.isArray(c && c.thread)) rawMessages = c.thread;
+    if (!rawMessages.length && Array.isArray(c && c.message_list)) rawMessages = c.message_list;
+    if (!rawMessages.length && c && (c.text || c.message)) {
+      rawMessages = [{
+        direction: queuedMode ? 'out' : 'out',
+        text: c.text || c.message || '',
+        timestamp: c.timestamp || c.ts || c.date_iso || '',
+        date_heading: c.date_heading || ''
+      }];
+    }
+    if (!rawMessages.length && c && (c.last_message_text || c.last_message || c.preview)) {
+      rawMessages = [{
+        direction: queuedMode ? 'out' : normalizeDirection(c.direction || 'out'),
+        text: c.last_message_text || c.last_message || c.preview || '',
+        timestamp: c.last_message_ts || c.last_ts || c.timestamp || c.ts || c.date_iso || '',
+        date_heading: c.date_heading || ''
+      }];
+    }
+    if (!rawMessages.length) return null;
+    var resumeAtRaw = c && c.meta && c.meta.resume_at ? c.meta.resume_at : (c && c.resume_at ? c.resume_at : '');
+    var scheduledLabel = 'Scheduled';
+    if (queuedMode && resumeAtRaw) {
+      scheduledLabel = 'Scheduled • ' + formatMsgTime(resumeAtRaw);
+    }
+    var messages = rawMessages.map(function(m){
+      var dirRaw = queuedMode ? 'out' : normalizeDirection(m && m.direction);
+      return {
+        dirRaw: dirRaw,
+        dir: dirRaw === 'out' ? 'sent' : 'recv',
+        text: String((m && m.text) || '').trim() || '—',
+        time: queuedMode ? scheduledLabel : formatMsgTime(m && (m.timestamp || m.ts || m.date_iso)),
+        timestamp: String((m && (m.date_iso || m.timestamp || m.ts)) || ''),
+        dateHeading: String((m && m.date_heading) || '').trim()
+      };
+    });
+    var lastMessage = messages[messages.length - 1];
+    var initials = leadName
+      ? leadName.split(/\s+/).filter(Boolean).slice(0, 2).map(function(p){ return p.charAt(0).toUpperCase(); }).join('')
+      : 'NA';
+    var status = queuedMode ? 'queued' : toStatus(messages);
+    var previewText = String(lastMessage.text || '—');
+    return {
+      id: c && (c.id || c.conversation_id) ? String(c.id || c.conversation_id) : ((queuedMode ? 'qm-' : 'im-') + idx),
+      name: leadName || toLeadSlug(leadUrlRaw) || 'Unknown',
+      initials: initials || 'NA',
+      color: palette[idx % palette.length],
+      textColor: textPalette[idx % textPalette.length],
+      preview: previewText.length > 80 ? (previewText.slice(0, 77) + '...') : previewText,
+      time: queuedMode ? scheduledLabel : (lastMessage.time || '—'),
+      url: leadUrlRaw,
+      leadSlug: toLeadSlug(leadUrlRaw),
+      replyStatus: status,
+      messages: messages,
+      sortTs: Date.parse(lastMessage.timestamp || '')
+    };
+  }
+  function fetchInboxMessages(){
+    var tabState = PAGINATION[targetTab] || PAGINATION.all;
+    return window.AppApiIntegration.getInboxMessages({
+      email: context.email,
+      env: context.env,
+      page: tabState.page,
+      page_size: tabState.pageSize,
+      campaign_id: context.campaign_id
+    }).then(function(data){
+      if (typeof console !== 'undefined' && typeof console.log === 'function') {
+        console.log('Inbox Response:', data);
+      }
+      var items = extractConversationItems(data);
+      var mappedInbox = [];
+      items.forEach(function(c, idx){
+        var mapped = mapConversation(c, idx, false);
+        if (mapped) mappedInbox.push(mapped);
+      });
+      mappedInbox.sort(function(a, b){
+        var aTs = Number(a && a.sortTs);
+        var bTs = Number(b && b.sortTs);
+        if (isNaN(aTs)) aTs = 0;
+        if (isNaN(bTs)) bTs = 0;
+        return bTs - aTs;
+      });
+      var filteredInbox = mappedInbox.filter(function(c){
+        var msgs = Array.isArray(c && c.messages) ? c.messages : [];
+        if (!msgs.length) return false;
+        var hasIn = msgs.some(function(m){ return m.dirRaw === 'in'; });
+        if (targetTab === 'replied') return hasIn;
+        if (targetTab === 'no-reply' || targetTab === 'sent') return !hasIn;
+        return true;
+      });
+      if (!appendMode) MESSAGES_BY_TAB[targetTab] = [];
+      MESSAGES_BY_TAB[targetTab] = (MESSAGES_BY_TAB[targetTab] || []).concat(filteredInbox);
+      MESSAGES_THREADS.length = 0;
+      MESSAGES_BY_TAB[targetTab].forEach(function(x){ MESSAGES_THREADS.push(x); });
+      tabState.hasMore = mappedInbox.length === tabState.pageSize;
+      DATA_ALREADY_LOADED[targetTab] = true;
+      return data;
+    });
+  }
+  function fetchQueuedMessages(){
+    var tabState = PAGINATION.queued;
+    return window.AppApiIntegration.getCampaignQueuedMessages({
+      email: context.email,
+      env: context.env,
+      page: tabState.page,
+      page_size: tabState.pageSize,
+      campaign_id: context.campaign_id
+    }).then(function(queuedData){
+      var raw = queuedData && queuedData.data ? queuedData.data : queuedData;
+      if (typeof console !== 'undefined' && typeof console.log === 'function') {
+        console.log('QUEUED FULL RESPONSE:', JSON.stringify(raw, null, 2));
+        console.log('RAW QUEUED API RESPONSE:', queuedData);
+        console.log('QUEUED RESPONSE DATA:', raw);
+        console.log('Queued Response:', queuedData);
+      }
+      var queuedItems = [];
+      if (Array.isArray(raw && raw.QueuedMessages)) {
+        queuedItems = raw.QueuedMessages;
+      } else if (Array.isArray(raw && raw.Messages)) {
+        queuedItems = raw.Messages;
+      } else if (Array.isArray(raw && raw.data)) {
+        queuedItems = raw.data;
+      } else if (typeof console !== 'undefined' && typeof console.error === 'function') {
+        console.error('❌ UNKNOWN QUEUED RESPONSE STRUCTURE', raw);
+      }
+      if (typeof console !== 'undefined' && typeof console.log === 'function') {
+        console.log('FINAL QUEUED LIST LENGTH:', queuedItems.length);
+        console.log('FINAL QUEUED LIST DATA:', queuedItems);
+        console.log('FINAL QUEUED LIST:', queuedItems);
+      }
+      var filteredQueued = queuedItems.filter(function(item){
+        var q = item && Array.isArray(item.queued) && item.queued.length ? item.queued[0] : null;
+        return !!(q && String(q.status || '').toLowerCase() === 'queued');
+      });
+      if (typeof console !== 'undefined' && typeof console.log === 'function') {
+        console.log('TOTAL QUEUED:', queuedItems.length);
+        console.log('FILTERED INITIAL QUEUED:', filteredQueued.length);
+      }
+      if (!appendMode) QUEUED_THREADS.length = 0;
+      var mappedQueued = filteredQueued.map(function(item){
+        var q = item && Array.isArray(item.queued) && item.queued.length ? item.queued[0] : {};
+        return {
+          leadName: item && (item.leadName || item.name || ''),
+          leadUrl: item && (item.leadUrl || item.url || ''),
+          messages: [{
+            text: (q && q.message_template) || 'Queued message',
+            timestamp: (q && q.updated_at) || '',
+            direction: 'out'
+          }],
+          replyStatus: 'queued',
+          meta: {
+            status: 'queued',
+            resume_at: (q && q.resume_at) || '',
+            node: (q && q.current_node_type) || ''
+          }
+        };
+      });
+      if (typeof console !== 'undefined' && typeof console.log === 'function') {
+        console.log('MAPPED QUEUED DATA:', mappedQueued);
+      }
+      mappedQueued.forEach(function(c, idx){
+        var mapped = mapConversation(c, idx, true);
+        if (mapped) QUEUED_THREADS.push(mapped);
+      });
+      if (typeof setTimeout === 'function') {
+        setTimeout(function(){
+          if (typeof console !== 'undefined' && typeof console.log === 'function') {
+            console.log('STATE AFTER SET:', QUEUED_THREADS);
+          }
+        }, 0);
+      }
+      QUEUED_THREADS.sort(function(a, b){
+        var aTs = Number(a && a.sortTs);
+        var bTs = Number(b && b.sortTs);
+        if (isNaN(aTs)) aTs = 0;
+        if (isNaN(bTs)) bTs = 0;
+        return bTs - aTs;
+      });
+      tabState.hasMore = queuedItems.length === tabState.pageSize;
+      DATA_ALREADY_LOADED.queued = true;
+      return queuedData;
+    });
+  }
+
+  setGlobalLoading(true, appendMode ? 'Loading more conversations…' : 'Loading conversations…');
+  var runner = targetTab === 'queued' ? fetchQueuedMessages() : fetchInboxMessages();
+  return Promise.resolve(runner).then(function(){
+    if (typeof console !== 'undefined' && typeof console.log === 'function') {
+      console.log('Active Tab:', activeMessagesTab);
+      console.log('Messages Data:', MESSAGES_THREADS);
+      console.log('Queued Data:', QUEUED_THREADS);
+      console.log('Page:', (PAGINATION[targetTab] || {}).page);
+      console.log('Has More:', (PAGINATION[targetTab] || {}).hasMore);
+      console.log('Items Loaded:', getThreadsForMessagesTab(targetTab).length);
+    }
+    var allCount = (MESSAGES_BY_TAB.all || []).length;
+    var sentOnlyCount = (MESSAGES_BY_TAB.sent || []).length;
+    var repliedCount = (MESSAGES_BY_TAB.replied || []).length;
+    var noReplyCount = (MESSAGES_BY_TAB['no-reply'] || []).length;
+    var queuedCount = QUEUED_THREADS.length;
+    if (DATA['messages-sent']) {
+      DATA['messages-sent'].summary = [
+        { label: 'Total', val: allCount },
+        { label: 'Sent', val: sentOnlyCount },
+        { label: 'Replied', val: repliedCount },
+        { label: 'No reply', val: noReplyCount },
+        { label: 'Queued', val: queuedCount }
+      ];
+    }
+    var tabGroup = document.getElementById('messages-tab-group');
+    if (tabGroup) {
+      var allTab = tabGroup.querySelector('[data-tab="all"]');
+      var sentTab = tabGroup.querySelector('[data-tab="sent"]');
+      var repliedTab = tabGroup.querySelector('[data-tab="replied"]');
+      var noReplyTab = tabGroup.querySelector('[data-tab="no-reply"]');
+      var queuedTab = tabGroup.querySelector('[data-tab="queued"]');
+      if (allTab) allTab.textContent = 'All (' + allCount + ')';
+      if (sentTab) sentTab.textContent = 'Sent (' + sentOnlyCount + ')';
+      if (repliedTab) repliedTab.textContent = 'Replied (' + repliedCount + ')';
+      if (noReplyTab) noReplyTab.textContent = 'No Reply (' + noReplyCount + ')';
+      if (queuedTab) {
+        queuedTab.hidden = false;
+        queuedTab.textContent = 'Queued (' + queuedCount + ')';
+      }
+    }
+    updateMessagesLoadMoreUi();
+    return (allCount + queuedCount) > 0;
   }).catch(function(){
-    showGlobalError('Unable to fetch conversations API. Showing local data.');
+    if (targetTab === 'queued') {
+      QUEUED_THREADS.length = 0;
+    } else {
+      MESSAGES_BY_TAB[targetTab] = [];
+      MESSAGES_THREADS.length = 0;
+    }
+    showGlobalError('Unable to fetch inbox messages right now.');
+    updateMessagesLoadMoreUi();
     return false;
   }).finally(function(){
     setGlobalLoading(false);
+  });
+}
+
+function getThreadsForMessagesTab(tab){
+  var key = normalizeMessagesRouteTab(tab || activeMessagesTab || 'sent');
+  if (key === 'queued') return QUEUED_THREADS.slice();
+  return Array.isArray(MESSAGES_BY_TAB[key]) ? MESSAGES_BY_TAB[key].slice() : [];
+}
+
+function updateMessagesLoadMoreUi(){
+  var wrap = document.getElementById('msg-list-more-wrap');
+  var btn = document.getElementById('msg-load-more-btn');
+  if (!wrap || !btn) return;
+  var tab = normalizeMessagesRouteTab(activeMessagesTab || 'sent');
+  var p = PAGINATION[tab] || { hasMore: false };
+  var hasMore = !!p.hasMore;
+  wrap.hidden = !hasMore;
+  btn.hidden = !hasMore;
+  btn.disabled = !hasMore;
+}
+
+function loadMoreMessagesForActiveTab(){
+  var tab = normalizeMessagesRouteTab(activeMessagesTab || 'sent');
+  var state = PAGINATION[tab];
+  if (!state || !state.hasMore) return;
+  state.page += 1;
+  hydrateConversationsFromApi({ tab: tab, append: true }).then(function(){
+    var visible = getThreadsForMessagesTab(tab);
+    if (!visible.some(function(c){ return c.id === activeConvId; })) activeConvId = visible[0] ? visible[0].id : null;
+    renderConvList();
+    renderThread();
   });
 }
 
@@ -1985,18 +3233,62 @@ function pushRunFailedAction(type, run){
 }
 
 function runAcceptanceCheck(campaignId, rows){
+  var context = getCampaignDetailFetchContext();
+  var appState = getAppState ? getAppState() : {};
+  var rawState = loadAppStateRaw ? (loadAppStateRaw() || {}) : {};
+  var email = (context && context.email) || appState.aiSdrEmail || rawState.aiSdrEmail || '';
+  var env = (context && context.env) || appState.environment || rawState.environment || setupSelectedEnv || 'Dev';
+  var cid = campaignId || (context && context.campaign_id) || appState.activeCampaignId || rawState.activeCampaignId || '';
+  if (window.AppApiIntegration && typeof window.AppApiIntegration.runAcceptanceCheck === 'function') {
+    if (!email || !cid) {
+      return Promise.reject(new Error('Failed to fetch acceptance run data'));
+    }
+    return window.AppApiIntegration.runAcceptanceCheck({
+      email: email,
+      env: env,
+      campaign_id: cid
+    }).then(function(raw){
+      var payload = (raw && raw.acceptance_runs) ||
+        (raw && raw.data && raw.data.acceptance_runs) ||
+        (raw && raw.data && raw.data.result && raw.data.result.acceptance_runs) ||
+        null;
+      if (!payload || typeof payload !== 'object') {
+        throw new Error('Failed to fetch acceptance run data');
+      }
+      var statusRaw = payload.status != null ? String(payload.status).trim().toLowerCase() : '';
+      var status = statusRaw === 'success' ? 'success' : (statusRaw === 'pending' || statusRaw === 'running' || statusRaw === 'queued' || statusRaw === 'waiting' ? 'pending' : 'failed');
+      var runAt = payload.last_run || new Date().toISOString();
+      return {
+        run_id: 'run_' + Date.now().toString(36),
+        campaign_id: cid,
+        status: status,
+        started_at: runAt,
+        completed_at: runAt,
+        executed_count: toNumberOrZero(payload.executed_count),
+        succeeded_count: toNumberOrZero(payload.succeeded_count),
+        failed_count: toNumberOrZero(payload.failed_count),
+        accepted_count: toNumberOrZero(payload.accepted_count),
+        accepted_profiles: [],
+        new_reference_node: payload.reference_node ? String(payload.reference_node) : '',
+        error_message: status === 'failed' ? 'Failed to fetch acceptance run data' : ''
+      };
+    });
+  }
   if (window.AppAcceptanceRunService && typeof window.AppAcceptanceRunService.simulateAcceptanceRun === 'function') {
     return window.AppAcceptanceRunService.simulateAcceptanceRun({
-      campaign_id: campaignId,
+      campaign_id: cid,
       rows: rows
     });
   }
   return Promise.resolve({
     run_id: 'run_' + Date.now().toString(36),
-    campaign_id: campaignId,
+    campaign_id: cid,
     status: 'failed',
     started_at: new Date().toISOString(),
     completed_at: new Date().toISOString(),
+    executed_count: 0,
+    succeeded_count: 0,
+    failed_count: 0,
     accepted_count: 0,
     accepted_profiles: [],
     new_reference_node: '',
@@ -2005,24 +3297,66 @@ function runAcceptanceCheck(campaignId, rows){
 }
 
 function runMessagesCheck(campaignId, rows){
-  if (window.AppMessagesRunService && typeof window.AppMessagesRunService.runMessagesCheck === 'function') {
-    return window.AppMessagesRunService.runMessagesCheck({
-      campaign_id: campaignId,
-      rows: rows
+  var context = getCampaignDetailFetchContext();
+  var appState = getAppState ? getAppState() : {};
+  var rawState = loadAppStateRaw ? (loadAppStateRaw() || {}) : {};
+  var email = (context && context.email) || appState.aiSdrEmail || rawState.aiSdrEmail || '';
+  var env = (context && context.env) || appState.environment || rawState.environment || setupSelectedEnv || 'Dev';
+  var cid = campaignId || (context && context.campaign_id) || appState.activeCampaignId || rawState.activeCampaignId || '';
+  if (window.AppApiIntegration && typeof window.AppApiIntegration.runMessagesCheck === 'function') {
+    if (!email || !cid) return Promise.reject(new Error('Unable to load message run data'));
+    return window.AppApiIntegration.runMessagesCheck({
+      email: email,
+      env: env,
+      campaign_id: cid
+    }).then(function(raw){
+      var payload = (raw && raw.messages_runs) ||
+        (raw && raw.data && raw.data.messages_runs) ||
+        (raw && raw.data && raw.data.result && raw.data.result.messages_runs) ||
+        null;
+      if (!payload || typeof payload !== 'object') throw new Error('Unable to load message run data');
+      var statusRaw = payload.status != null ? String(payload.status).trim().toLowerCase() : '';
+      var status = statusRaw === 'success' ? 'success' : (statusRaw === 'failed' ? 'failed' : (statusRaw ? 'pending' : ''));
+      var runAt = payload.last_run || new Date().toISOString();
+      var preview = Array.isArray(payload.replies_preview) ? payload.replies_preview : [];
+      var replies = preview.map(function(row){
+        return {
+          name: row && (row.name || row.lead_name || row.identifier || row.lead) ? String(row.name || row.lead_name || row.identifier || row.lead) : 'Unknown',
+          last_reply_message: row && (row.message || row.preview || row.last_reply_message || row.text) ? String(row.message || row.preview || row.last_reply_message || row.text) : 'Reply detected',
+          replied_at: row && (row.timestamp || row.replied_at || row.last_run_at) ? String(row.timestamp || row.replied_at || row.last_run_at) : ''
+        };
+      });
+      return {
+        run_id: 'msg_run_' + Date.now().toString(36),
+        campaign_id: cid,
+        type: 'messages_run',
+        status: status,
+        started_at: runAt,
+        completed_at: runAt,
+        executed_count: toNumberOrZero(payload.executed_count),
+        succeeded_count: toNumberOrZero(payload.succeeded_count),
+        failed_count: toNumberOrZero(payload.failed_count),
+        leads_processed: toNumberOrZero(payload.leads_processed),
+        replies_detected: toNumberOrZero(payload.replies_detected),
+        replies: replies,
+        error_message: status === 'failed' ? 'Unable to load message run data' : ''
+      };
     });
   }
   return Promise.resolve({
     run_id: 'msg_run_' + Date.now().toString(36),
-    campaign_id: campaignId,
+    campaign_id: cid,
     type: 'messages_run',
     status: 'failed',
     started_at: new Date().toISOString(),
     completed_at: new Date().toISOString(),
+    executed_count: 0,
+    succeeded_count: 0,
     leads_processed: 0,
     replies_detected: 0,
     failed_count: 0,
     replies: [],
-    error_message: 'Messages run service is unavailable.'
+    error_message: 'Unable to load message run data'
   });
 }
 
@@ -2050,11 +3384,54 @@ function initDashboardRunTracking(){
     pushFailure: function(type, run){ pushRunFailedAction(type, run); },
     makeFailedAcceptanceRun: function(message){
       var now = new Date().toISOString();
-      return { run_id: 'run_' + Date.now().toString(36), campaign_id: campaignId, status: 'failed', started_at: now, completed_at: now, accepted_count: 0, accepted_profiles: [], new_reference_node: '', error_message: message || 'Acceptance run failed.' };
+      return {
+        run_id: 'run_' + Date.now().toString(36),
+        campaign_id: campaignId,
+        status: 'failed',
+        started_at: now,
+        completed_at: now,
+        executed_count: 0,
+        succeeded_count: 0,
+        failed_count: 0,
+        accepted_count: 0,
+        accepted_profiles: [],
+        new_reference_node: '',
+        error_message: message || 'Failed to fetch acceptance run data'
+      };
     },
     makeFailedMessagesRun: function(message){
       var now = new Date().toISOString();
-      return { run_id: 'msg_run_' + Date.now().toString(36), campaign_id: campaignId, type: 'messages_run', status: 'failed', started_at: now, completed_at: now, leads_processed: 0, replies_detected: 0, failed_count: 0, replies: [], error_message: message || 'Messages run failed.' };
+      return {
+        run_id: 'msg_run_' + Date.now().toString(36),
+        campaign_id: campaignId,
+        type: 'messages_run',
+        status: 'failed',
+        started_at: now,
+        completed_at: now,
+        executed_count: 0,
+        succeeded_count: 0,
+        leads_processed: 0,
+        replies_detected: 0,
+        failed_count: 0,
+        replies: [],
+        error_message: message || 'Unable to load message run data'
+      };
+    },
+    shouldAutoRunAcceptance: function(){
+      var ctx = getCampaignDetailFetchContext();
+      var appState = getAppState ? getAppState() : {};
+      var rawState = loadAppStateRaw ? (loadAppStateRaw() || {}) : {};
+      var email = (ctx && ctx.email) || appState.aiSdrEmail || rawState.aiSdrEmail || '';
+      var cid = campaignId || (ctx && ctx.campaign_id) || appState.activeCampaignId || rawState.activeCampaignId || '';
+      return !!(window.AppApiIntegration && typeof window.AppApiIntegration.runAcceptanceCheck === 'function' && email && cid);
+    },
+    shouldAutoRunMessages: function(){
+      var ctx = getCampaignDetailFetchContext();
+      var appState = getAppState ? getAppState() : {};
+      var rawState = loadAppStateRaw ? (loadAppStateRaw() || {}) : {};
+      var email = (ctx && ctx.email) || appState.aiSdrEmail || rawState.aiSdrEmail || '';
+      var cid = campaignId || (ctx && ctx.campaign_id) || appState.activeCampaignId || rawState.activeCampaignId || '';
+      return !!(window.AppApiIntegration && typeof window.AppApiIntegration.runMessagesCheck === 'function' && email && cid);
     },
     statusPill: statusPill,
     log: function(eventName, payload){
@@ -2125,23 +3502,10 @@ function applyAppStateToHeaders(){
       var cls = ENV_BADGE_CLASS[s.environment] || 'env-badge--none';
       el.className = 'header-env-badge ' + cls;
     });
-    var stopped = s.campaignStatus === 'Stopped';
-    var active = s.campaignStatus === 'Active';
-    var dashBadge = document.getElementById('dashboard-status-badge');
-    if (dashBadge){
-      if (stopped) {
-        dashBadge.className = 'badge badge--stopped';
-        dashBadge.innerHTML = '<span class="badge-dot badge-dot--stopped"></span>Stopped';
-      } else if (active) {
-        dashBadge.className = 'badge';
-        dashBadge.innerHTML = '<span class="badge-dot"></span>Active';
-      } else {
-        dashBadge.className = 'badge badge--inactive';
-        dashBadge.innerHTML = '<span class="badge-dot badge-dot--inactive"></span>Inactive';
-      }
-    }
+    applyCampaignLifecycleBadge(s.campaignStatus);
   }
   var dashSub = document.getElementById('dashboard-campaign-sub');
+  var ipSub = document.getElementById('ip-monitoring-campaign-sub');
   if (dashSub){
     var raw = loadAppStateRaw() || {};
     var cid = raw.activeCampaignId || '';
@@ -2158,12 +3522,29 @@ function applyAppStateToHeaders(){
     } else {
       dashSub.textContent = 'Campaign ID: 69cf8f5d46691ec7d7bf8cc88';
     }
+    if (ipSub) {
+      ipSub.innerHTML = dashSub.innerHTML || dashSub.textContent || 'Campaign ID: —';
+    }
+  } else if (ipSub) {
+    ipSub.textContent = 'Campaign ID: —';
   }
 }
 
 var __routerState = {
   syncingHash: false
 };
+
+function extractCampaignIpMonitoringRoute(path){
+  var m = String(path || '').match(/^\/campaign\/([^/]+)\/ip-monitoring$/i);
+  if (!m) return null;
+  var id = '';
+  try {
+    id = decodeURIComponent(m[1] || '');
+  } catch (e) {
+    id = String(m[1] || '');
+  }
+  return { campaignId: id };
+}
 
 function getRouteInfoFromHash(hash){
   var raw = String(hash || window.location.hash || '').replace(/^#/, '');
@@ -2210,12 +3591,17 @@ function normalizeSetupRouteTab(tab){
 
 function normalizeMessagesRouteTab(tab){
   var t = String(tab || '').toLowerCase();
-  if (t === 'queued' || t === 'sent' || t === 'replied' || t === 'no-reply') return t;
-  return 'sent';
+  if (t === 'all' || t === 'queued' || t === 'sent' || t === 'replied' || t === 'no-reply') return t;
+  return 'all';
 }
 
 function routeForScreen(screenId){
   if (screenId === 'screen-dashboard') return buildHashRoute('/dashboard');
+  if (screenId === 'screen-ip-monitoring') {
+    var cid = getRunTrackingCampaignId() || ((loadAppStateRaw() || {}).activeCampaignId || '');
+    if (!cid) return buildHashRoute('/dashboard');
+    return '#' + '/campaign/' + encodeURIComponent(String(cid)) + '/ip-monitoring';
+  }
   if (screenId === 'screen-detail') return buildHashRoute('/detail', { key: currentKey || 'recent-runs' });
   if (screenId === 'screen-messages') return buildHashRoute('/messages', { tab: normalizeMessagesRouteTab(activeMessagesTab || 'sent') });
   return buildHashRoute('/setup', { tab: normalizeSetupRouteTab(window.__setupActiveTab || 'campaigns') });
@@ -2236,11 +3622,40 @@ function showAppScreen(screenId, opts){
   var el = document.getElementById(screenId);
   if (el) {
     el.classList.add('active');
-    if (screenId === 'screen-setup' || screenId === 'screen-dashboard' || screenId === 'screen-detail' || screenId === 'screen-messages') {
+    if (screenId === 'screen-setup' || screenId === 'screen-dashboard' || screenId === 'screen-ip-monitoring' || screenId === 'screen-detail' || screenId === 'screen-messages') {
       saveAppState({ currentScreen: screenId });
     }
   }
   if (!options.skipRouteSync) updateHashForScreen(screenId);
+  if (screenId === 'screen-messages') {
+    bindLegacyMessagesTabs();
+    hydrateConversationsFromApi({ tab: activeMessagesTab, append: false }).then(function(){
+      var visible = getThreadsForMessagesTab(activeMessagesTab);
+      if (!activeConvId || !visible.some(function(c){ return c.id === activeConvId; })) activeConvId = visible[0] ? visible[0].id : null;
+      syncLegacyMessagesTabsUi();
+      renderConvList();
+      renderThread();
+    });
+  }
+}
+
+function openIpMonitoringScreen(campaignId, opts){
+  var options = opts || {};
+  var raw = loadAppStateRaw() || {};
+  var nextCampaignId = campaignId != null && campaignId !== ''
+    ? String(campaignId)
+    : (raw.activeCampaignId || getRunTrackingCampaignId() || '');
+  if (!nextCampaignId) {
+    showGlobalError('Select a campaign first to view IP monitoring.');
+    return;
+  }
+  if (String(raw.activeCampaignId || '') !== String(nextCampaignId)) {
+    saveAppState({ activeCampaignId: String(nextCampaignId) });
+  }
+  applyAppStateToHeaders();
+  showAppScreen('screen-ip-monitoring', { skipRouteSync: !!options.skipRouteSync });
+  hydrateCampaignIpMonitoringFromApi(getCampaignDetailFetchContext());
+  hydrateProfileHealthFromApi(getCampaignDetailFetchContext(), { silentError: true });
 }
 
 function openSetupScreen(){
@@ -2319,14 +3734,6 @@ function renderCampaignSetupTable(){
   if (tableEl) tableEl.removeAttribute('aria-hidden');
 
   tbody.innerHTML = filtered.map(function(c){
-    if (window.AppCampaignService && typeof window.AppCampaignService.buildCampaignRowHtml === 'function') {
-      return window.AppCampaignService.buildCampaignRowHtml(c, {
-        escapeHtml: escapeHtml,
-        escapeAttr: escapeAttr,
-        formatCampaignCreatedAt: formatCampaignCreatedAt,
-        statusBadgeHtml: statusBadgeHtml
-      });
-    }
     var cid = (c.campaignId != null && c.campaignId !== '') ? String(c.campaignId) : '—';
     var name = c.campaignName || c.name || '';
     var email = c.aiSdrEmail ? String(c.aiSdrEmail) : '—';
@@ -2343,11 +3750,22 @@ function renderCampaignSetupTable(){
       ? window.AppCampaignService.campaignListRowTone(c.status)
       : normalizeCampaignStatus(c.status).toLowerCase();
     var rowCls = 'campaign-row--' + rowTone;
+    var counts = c && c.actionCountsDistinct ? c.actionCountsDistinct : {};
+    var activityHtml = '<div class="campaign-activity-badges">' +
+      '<span class="campaign-activity-pill" title="Profile views">👀 ' + toNumberOrZero(counts.views) + '</span>' +
+      '<span class="campaign-activity-pill" title="Connections sent">🤝 ' + toNumberOrZero(counts.connections_sent) + '</span>' +
+      '<span class="campaign-activity-pill" title="Messages sent">💬 ' + toNumberOrZero(counts.messages_sent) + '</span>' +
+      '<span class="campaign-activity-pill" title="Posts liked">❤️ ' + toNumberOrZero(counts.like_post) + '</span>' +
+      '<span class="campaign-activity-pill" title="Connected">✅ ' + toNumberOrZero(counts.connected) + '</span>' +
+      '<span class="campaign-activity-pill" title="Pending">⏳ ' + toNumberOrZero(counts.not_connected_yet) + '</span>' +
+      '<span class="campaign-activity-pill" title="Replies">📩 ' + toNumberOrZero(counts.replied) + '</span>' +
+      '</div>';
     return '<tr class="' + rowCls + '">' +
       '<td data-label="Campaign">' + nameBlock + '</td>' +
       '<td data-label="AI SDR email"><span class="campaign-monospace">' + escapeHtml(email) + '</span></td>' +
       '<td data-label="Environment">' + escapeHtml(env) + '</td>' +
       '<td data-label="Status">' + statusBadgeHtml(c.status) + '</td>' +
+      '<td data-label="Activity">' + activityHtml + '</td>' +
       '<td data-label="Created">' + escapeHtml(formatCampaignCreatedAt(iso)) + '</td>' +
       '<td data-label="Actions">' + monitorBtn + '</td>' +
       '</tr>';
@@ -2364,6 +3782,7 @@ function monitorCampaign(campaignId){
       showAppScreen: showAppScreen,
       hasActivityChart: function(){ return !!activityChartInstance; },
       bootChartsAndFailed: bootChartsAndFailed,
+      initDashboardRunTracking: initDashboardRunTracking,
       renderFailedActions: renderFailedActions,
       resizeActivityChart: resizeActivityChart,
       hydrateOverviewFromApi: hydrateOverviewFromApi,
@@ -2405,8 +3824,10 @@ function routeApplicationBoot(){
   var raw = loadAppStateRaw() || {};
   var persistedScreen = raw.currentScreen;
   var routeInfo = getRouteInfoFromHash(window.location.hash);
+  var ipRoute = extractCampaignIpMonitoringRoute(routeInfo.path);
   var targetScreen = 'screen-setup';
   if (routeInfo.path === '/dashboard') targetScreen = 'screen-dashboard';
+  else if (ipRoute) targetScreen = 'screen-ip-monitoring';
   else if (routeInfo.path === '/detail') targetScreen = 'screen-detail';
   else if (routeInfo.path === '/messages') targetScreen = 'screen-messages';
   else if (routeInfo.path === '/setup') targetScreen = 'screen-setup';
@@ -2414,6 +3835,7 @@ function routeApplicationBoot(){
     targetScreen = (
       persistedScreen === 'screen-setup' ||
       persistedScreen === 'screen-dashboard' ||
+      persistedScreen === 'screen-ip-monitoring' ||
       persistedScreen === 'screen-detail' ||
       persistedScreen === 'screen-messages'
     ) ? persistedScreen : 'screen-setup';
@@ -2449,6 +3871,11 @@ function routeApplicationBoot(){
       showMessages({ skipRouteSync: routeInfo.path === '/messages' });
       return;
     }
+    if (targetScreen === 'screen-ip-monitoring') {
+      var routeCampaignId = ipRoute && ipRoute.campaignId ? ipRoute.campaignId : '';
+      openIpMonitoringScreen(routeCampaignId, { skipRouteSync: !!ipRoute });
+      return;
+    }
     showAppScreen(targetScreen, { skipRouteSync: routeInfo.path === '/dashboard' });
     bootChartsAndFailed();
     hydrateOverviewFromApi();
@@ -2464,6 +3891,7 @@ function handleRouteChange(){
     return;
   }
   var info = getRouteInfoFromHash(window.location.hash);
+  var ipRoute = extractCampaignIpMonitoringRoute(info.path);
   if (info.path === '/setup') {
     window.__setupActiveTab = normalizeSetupRouteTab(info.params && info.params.tab ? info.params.tab : window.__setupActiveTab);
     openSetupScreen({ skipRouteSync: true });
@@ -2482,6 +3910,15 @@ function handleRouteChange(){
       resizeActivityChart();
     }
     hydrateOverviewFromApi();
+    return;
+  }
+  if (ipRoute) {
+    if (!isSetupComplete()){
+      openSetupScreen({ skipRouteSync: true });
+      return;
+    }
+    applyAppStateToHeaders();
+    openIpMonitoringScreen(ipRoute.campaignId, { skipRouteSync: true });
     return;
   }
   if (info.path === '/messages') {
@@ -2871,28 +4308,18 @@ function initSetupForm(){
 const FAILED_ACTIONS = (window.AppFailedActionsService && typeof window.AppFailedActionsService.getFailedActions === 'function')
   ? window.AppFailedActionsService.getFailedActions()
   : [];
+var failedActionsEmptyMessage = 'No failures found for this campaign yet.';
 
 const DATA = {
   'recent-runs': {
     title: 'Recent runs',
-    sub: '10 actions in the last 24 hours',
+    sub: 'Recent run activity',
     icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#185FA5" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>',
     iconBg: '#E6F1FB',
-    summary: [{label:'Total runs', val:10},{label:'Queued', val:7},{label:'Done', val:2},{label:'Failed', val:1}],
-    filters: ['All','Queued','Done','Failed'],
-    cols: ['Lead','Profile URL','Action','Status','Time'],
-    rows: [
-      {name:'Angela Game',initials:'AG',color:'#E6F1FB',textColor:'#185FA5',url:'linkedin.com/in/angela-game-257158301',action:'Like post',status:'queued',time:'6:22 PM'},
-      {name:'Angela Crawford',initials:'AC',color:'#EEEDFE',textColor:'#534AB7',url:'linkedin.com/in/angela-crawford-cltr-cntg-52034623',action:'View profile',status:'queued',time:'6:23 PM'},
-      {name:'Joe Prince',initials:'JP',color:'#E1F5EE',textColor:'#0F6E56',url:'linkedin.com/in/joe-prince-bartachano-530b5115a',action:'Like post',status:'queued',time:'6:05 PM'},
-      {name:'Andrea Glinden',initials:'AG',color:'#FBEAF0',textColor:'#993556',url:'linkedin.com/in/andrea-glindenew-368aa64',action:'View profile',status:'queued',time:'6:04 PM'},
-      {name:'Amy Croft',initials:'AC',color:'#FAEEDA',textColor:'#854F0B',url:'linkedin.com/in/amy-croft-775234152',action:'Like post',status:'queued',time:'5:48 PM'},
-      {name:'Joanbylo',initials:'JB',color:'#E6F1FB',textColor:'#185FA5',url:'linkedin.com/in/joanbylo',action:'View profile',status:'queued',time:'5:47 PM'},
-      {name:'Jose Luis Toma',initials:'JL',color:'#EAF3DE',textColor:'#3B6D11',url:'linkedin.com/in/jose-luis-toma-tanonneloff-cia0b0a45',action:'View profile',status:'done',time:'5:29 PM'},
-      {name:'Robin Organticos',initials:'RO',color:'#EEEDFE',textColor:'#534AB7',url:'linkedin.com/in/robinorganticos',action:'Like post',status:'queued',time:'5:14 PM'},
-      {name:'Jonathan Capucci',initials:'JC',color:'#FCEBEB',textColor:'#A32D2D',url:'linkedin.com/in/jonathan-capucci-ccm-94804013b',action:'View profile',status:'done',time:'5:13 PM'},
-      {name:'John Skintger',initials:'JS',color:'#E6F1FB',textColor:'#185FA5',url:'linkedin.com/in/john-skintger',action:'Like post',status:'failed',time:'6:57 PM'},
-    ]
+    summary: [{label:'Total runs', val:0},{label:'Completed', val:0},{label:'Queued', val:0},{label:'Failed', val:0}],
+    filters: ['All','Completed','Queued','Failed','Waiting','Running'],
+    cols: ['Lead','Status','Last Action','Result','Time'],
+    rows: []
   },
   'connections-sent': {
     title: 'Connections sent',
@@ -2919,80 +4346,71 @@ const DATA = {
   },
   'profile-views': {
     title: 'Profile views',
-    sub: '8 profiles viewed this campaign',
+    sub: '0 profiles viewed this campaign',
     icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#534AB7" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
     iconBg: '#EEEDFE',
-    summary: [{label:'Views', val:8},{label:'Responded', val:2},{label:'No response', val:6}],
-    filters: ['All','Responded','No response'],
-    cols: ['Lead','Profile URL','Viewed at','Response'],
-    rows: [
-      {name:'Angela Crawford',initials:'AC',color:'#EEEDFE',textColor:'#534AB7',url:'linkedin.com/in/angela-crawford-cltr-cntg-52034623',action:'',status:'no response',time:'6:23 PM'},
-      {name:'Andrea Glinden',initials:'AG',color:'#FBEAF0',textColor:'#993556',url:'linkedin.com/in/andrea-glindenew-368aa64',action:'',status:'responded',time:'6:04 PM'},
-      {name:'Joanbylo',initials:'JB',color:'#E6F1FB',textColor:'#185FA5',url:'linkedin.com/in/joanbylo',action:'',status:'no response',time:'5:47 PM'},
-      {name:'Jose Luis Toma',initials:'JL',color:'#EAF3DE',textColor:'#3B6D11',url:'linkedin.com/in/jose-luis-toma-tanonneloff-cia0b0a45',action:'',status:'responded',time:'5:29 PM'},
-      {name:'Robin Organticos',initials:'RO',color:'#EEEDFE',textColor:'#534AB7',url:'linkedin.com/in/robinorganticos',action:'',status:'no response',time:'5:14 PM'},
-      {name:'Jonathan Capucci',initials:'JC',color:'#FCEBEB',textColor:'#A32D2D',url:'linkedin.com/in/jonathan-capucci-ccm-94804013b',action:'',status:'no response',time:'5:13 PM'},
-      {name:'John Skintger',initials:'JS',color:'#E6F1FB',textColor:'#185FA5',url:'linkedin.com/in/john-skintger',action:'',status:'no response',time:'4:57 PM'},
-      {name:'Maria Fernandez',initials:'MF',color:'#E1F5EE',textColor:'#0F6E56',url:'linkedin.com/in/maria-fernandez-mx12',action:'',status:'no response',time:'4:45 PM'},
-    ]
+    summary: [{label:'Total Profile Views', val:0}],
+    filters: [],
+    cols: ['Lead','Profile URL','Viewed At'],
+    rows: []
   },
   'posts-liked': {
     title: 'Posts liked',
-    sub: '15 posts liked across leads',
+    sub: '0 posts liked this campaign',
     icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#854F0B" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
     iconBg: '#FAEEDA',
-    summary: [{label:'Posts liked', val:15},{label:'Leads engaged', val:12},{label:'Avg per lead', val:1}],
-    filters: ['All'],
-    cols: ['Lead','Profile URL','Post liked at','Action'],
-    rows: [
-      {name:'Angela Game',initials:'AG',color:'#E6F1FB',textColor:'#185FA5',url:'linkedin.com/in/angela-game-257158301',action:'Like post',status:'done',time:'6:22 PM'},
-      {name:'Joe Prince',initials:'JP',color:'#E1F5EE',textColor:'#0F6E56',url:'linkedin.com/in/joe-prince-bartachano-530b5115a',action:'Like post',status:'done',time:'6:05 PM'},
-      {name:'Amy Croft',initials:'AC',color:'#FAEEDA',textColor:'#854F0B',url:'linkedin.com/in/amy-croft-775234152',action:'Like post',status:'done',time:'5:48 PM'},
-      {name:'Robin Organticos',initials:'RO',color:'#EEEDFE',textColor:'#534AB7',url:'linkedin.com/in/robinorganticos',action:'Like post',status:'done',time:'5:14 PM'},
-      {name:'John Skintger',initials:'JS',color:'#E6F1FB',textColor:'#185FA5',url:'linkedin.com/in/john-skintger',action:'Like post',status:'done',time:'4:57 PM'},
-      {name:'Clara Nguyen',initials:'CN',color:'#E1F5EE',textColor:'#0F6E56',url:'linkedin.com/in/clara-nguyen-sf',action:'Like post',status:'done',time:'4:40 PM'},
-      {name:'Shanti Choi-Ihre',initials:'SC',color:'#FAEEDA',textColor:'#854F0B',url:'linkedin.com/in/shanti-choi-ihre',action:'Like post',status:'done',time:'4:30 PM'},
-      {name:'Maria Fernandez',initials:'MF',color:'#EAF3DE',textColor:'#3B6D11',url:'linkedin.com/in/maria-fernandez-mx12',action:'Like post',status:'done',time:'4:15 PM'},
-    ]
+    summary: [{label:'Total Posts Liked', val:0}],
+    filters: [],
+    cols: ['Lead','Profile URL','Liked At'],
+    rows: []
   },
   'messages-sent': {
     title: 'Messages sent',
-    sub: '5 messages in flow, including queued',
+    sub: 'No messages loaded yet',
     icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#993556" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>',
     iconBg: '#FBEAF0',
-    summary: [{label:'Sent', val:4},{label:'Replied', val:2},{label:'No reply', val:2},{label:'Queued', val:1}],
-    filters: ['Sent','Replied','No reply','Queued'],
+    summary: [{label:'Sent', val:0},{label:'Replied', val:0},{label:'No reply', val:0}],
+    filters: ['Sent','Replied','No reply'],
     cols: ['Lead','Profile URL','Sent at','Reply'],
-    rows: [
-      {name:'Jose Luis Toma',initials:'JL',color:'#EAF3DE',textColor:'#3B6D11',url:'linkedin.com/in/jose-luis-toma-tanonneloff-cia0b0a45',action:'',status:'replied',time:'5:29 PM'},
-      {name:'Jonathan Capucci',initials:'JC',color:'#FCEBEB',textColor:'#A32D2D',url:'linkedin.com/in/jonathan-capucci-ccm-94804013b',action:'',status:'no reply',time:'5:13 PM'},
-      {name:'Angela Game',initials:'AG',color:'#E6F1FB',textColor:'#185FA5',url:'linkedin.com/in/angela-game-257158301',action:'',status:'replied',time:'4:58 PM'},
-      {name:'Joanne Kbh-132a',initials:'JK',color:'#EAF3DE',textColor:'#3B6D11',url:'linkedin.com/in/joanne-kbh-132a20116',action:'',status:'no reply',time:'4:30 PM'},
-      {name:'Test User',initials:'TU',color:'#E1F5EE',textColor:'#0F6E56',url:'linkedin.com/in/test-user',action:'Queued follow-up',message:'Hello, this will be sent...',status:'queued',time:'scheduled'},
-    ]
+    rows: []
   },
   'accepted-profiles': {
     title: 'Accepted profiles',
-    sub: '3 connection requests accepted (23% rate)',
+    sub: '0 connection requests accepted',
     icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
     iconBg: '#EAF3DE',
-    summary: [{label:'Accepted', val:3},{label:'Sent', val:12},{label:'Accept rate', val:'23%'}],
-    filters: ['All'],
-    cols: ['Lead','Profile URL','Accepted at','Next action'],
-    rows: [
-      {name:'Angela Okhib',initials:'AO',color:'#EEEDFE',textColor:'#534AB7',url:'linkedin.com/in/angela-okhib-mmble-42640519',action:'Send message',status:'done',time:'4/1/2026 11:02 PM'},
-      {name:'Joanne Kbh-132a',initials:'JK',color:'#EAF3DE',textColor:'#3B6D11',url:'linkedin.com/in/joanne-kbh-132a20116',action:'Send message',status:'done',time:'4/1/2026 10:58 PM'},
-      {name:'Joseph Ibandu',initials:'JI',color:'#E1F5EE',textColor:'#0F6E56',url:'linkedin.com/in/josephibandu',action:'Like post',status:'queued',time:'4/1/2026 10:55 PM'},
-    ]
+    summary: [{label:'Total Accepted Profiles', val:0}],
+    filters: [],
+    cols: ['Lead','Profile URL','Accepted At'],
+    rows: []
   }
 };
 
 let activeFilter = 'All';
 let currentKey = null;
 
-const MESSAGES_THREADS = (window.AppMessageService && typeof window.AppMessageService.getMessagesThreads === 'function')
-  ? window.AppMessageService.getMessagesThreads()
-  : [];
+const MESSAGES_THREADS = [];
+const QUEUED_THREADS = [];
+const MESSAGES_BY_TAB = {
+  all: [],
+  sent: [],
+  replied: [],
+  'no-reply': []
+};
+const PAGINATION = {
+  all: { page: 1, pageSize: 20, hasMore: true },
+  sent: { page: 1, pageSize: 20, hasMore: true },
+  replied: { page: 1, pageSize: 20, hasMore: true },
+  'no-reply': { page: 1, pageSize: 20, hasMore: true },
+  queued: { page: 1, pageSize: 20, hasMore: true }
+};
+const DATA_ALREADY_LOADED = {
+  all: false,
+  sent: false,
+  replied: false,
+  'no-reply': false,
+  queued: false
+};
 
 let activeConvId = null;
 let activeMessagesTab = 'sent';
@@ -3296,18 +4714,30 @@ function sendCampaignInboxLine(){
 })();
 
 function renderConvList(){
-  if (isModularMessagesEnabled() && window.AppMessagesController && typeof window.AppMessagesController.renderConvList === 'function') {
-    return window.AppMessagesController.renderConvList({
-      getThreads: function(){ return MESSAGES_THREADS; },
-      getActiveConvId: function(){ return activeConvId; },
-      setActiveConvId: function(v){ activeConvId = v; },
-      getActiveTab: function(){ return activeMessagesTab; },
-      escapeHtml: escapeHtml
-    });
-  }
   const el = document.getElementById('msg-conv-list');
   if (!el) return;
-  el.innerHTML = MESSAGES_THREADS.map(c => `
+  var tableData = getThreadsForMessagesTab(activeMessagesTab);
+  if (typeof console !== 'undefined' && typeof console.log === 'function') {
+    console.log('Rendering Tab:', activeMessagesTab);
+    console.log('Active Tab:', activeMessagesTab);
+    console.log('Messages Data:', MESSAGES_THREADS);
+    console.log('Queued Data:', QUEUED_THREADS);
+    console.log('TABLE DATA USED:', tableData);
+  }
+  if (!tableData.length) {
+    el.innerHTML = '<div class="campaign-setup-empty"><p style="margin:0;">' + (activeMessagesTab === 'queued' ? 'No queued messages' : 'No messages yet') + '</p></div>';
+    if (!activeConvId) {
+      var thread = document.getElementById('msg-thread');
+      var headName = document.getElementById('msg-head-name');
+      var headStatus = document.getElementById('msg-head-status');
+      if (headName) headName.textContent = 'No messages yet';
+      if (headStatus) headStatus.textContent = '';
+      if (thread) thread.innerHTML = '<div class="campaign-setup-empty"><p style="margin:0;">No messages to display</p></div>';
+    }
+    updateMessagesLoadMoreUi();
+    return;
+  }
+  el.innerHTML = tableData.map(c => `
     <div class="msg-conv ${c.id === activeConvId ? 'active' : ''}" role="button" tabindex="0" onclick="selectConversation('${c.id}')" onkeydown="if(event.key==='Enter')selectConversation('${c.id}')">
       <div class="msg-conv-av" style="background:${c.color};color:${c.textColor};">${c.initials}</div>
       <div class="msg-conv-body">
@@ -3315,42 +4745,44 @@ function renderConvList(){
           <span class="msg-conv-name">${escapeHtml(c.name)}</span>
           <span class="msg-conv-time">${escapeHtml(c.time)}</span>
         </div>
-        <div class="msg-conv-preview">${escapeHtml(c.preview)}</div>
+        <div class="msg-conv-preview" title="${escapeHtml(c.preview)}">${escapeHtml(c.preview)}</div>
+        <div class="msg-conv-status">${c.replyStatus === 'replied' ? '🟢 Replied' : (c.replyStatus === 'waiting' ? '⏳ Waiting' : (c.replyStatus === 'queued' ? '🔵 Queued' : '🔵 Sent'))}</div>
       </div>
     </div>
   `).join('');
+  updateMessagesLoadMoreUi();
 }
 
 function renderThread(){
-  if (isModularMessagesEnabled() && window.AppMessagesController && typeof window.AppMessagesController.renderThread === 'function') {
-    return window.AppMessagesController.renderThread({
-      getThreads: function(){ return MESSAGES_THREADS; },
-      getActiveConvId: function(){ return activeConvId; },
-      setActiveConvId: function(v){ activeConvId = v; },
-      getActiveTab: function(){ return activeMessagesTab; },
-      escapeHtml: escapeHtml
-    });
-  }
   const thread = document.getElementById('msg-thread');
   const headAv = document.getElementById('msg-head-av');
   const headName = document.getElementById('msg-head-name');
   const headStatus = document.getElementById('msg-head-status');
-  const conv = MESSAGES_THREADS.find(x => x.id === activeConvId);
-  if (!conv || !thread) return;
+  var source = getThreadsForMessagesTab(activeMessagesTab);
+  const conv = source.find(x => x.id === activeConvId);
+  if (!thread) return;
+  if (!conv) {
+    if (headAv) headAv.textContent = '';
+    if (headName) headName.textContent = 'No messages yet';
+    if (headStatus) headStatus.textContent = '';
+    thread.innerHTML = '<div class="campaign-setup-empty"><p style="margin:0;">No messages to display</p></div>';
+    return;
+  }
   headAv.style.background = conv.color;
   headAv.style.color = conv.textColor;
   headAv.textContent = conv.initials;
   headName.textContent = conv.name;
-  if (conv.online) {
-    headStatus.textContent = 'Online';
-    headStatus.className = 'msg-chat-head-status online';
-  } else {
-    headStatus.textContent = conv.lastSeen || 'Offline';
-    headStatus.className = 'msg-chat-head-status';
-  }
-  thread.innerHTML = conv.messages.map(m => {
+  var linkHref = conv.url ? (/^https?:\/\//i.test(conv.url) ? conv.url : ('https://' + conv.url)) : '';
+  var slug = conv.leadSlug || formatLead(conv.url || '');
+  headStatus.className = 'msg-chat-head-status';
+  headStatus.innerHTML = (conv.replyStatus === 'replied' ? '🟢 Replied' : (conv.replyStatus === 'waiting' ? '⏳ Waiting' : (conv.replyStatus === 'queued' ? '🔵 Queued' : '🔵 Sent'))) +
+    (linkHref ? (' • <a class="msg-lead-link" href="' + escapeHtml(linkHref) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(slug) + '</a>') : '');
+  thread.innerHTML = conv.messages.map(function(m, idx, arr){
+    var prev = idx > 0 ? arr[idx - 1] : null;
+    var showHeading = !!m.dateHeading && (!prev || prev.dateHeading !== m.dateHeading);
     const sent = m.dir === 'sent';
-    return `<div class="msg-row ${sent ? 'msg-row--sent' : 'msg-row--recv'}">
+    var heading = showHeading ? `<div class="msg-date-heading">${escapeHtml(m.dateHeading)}</div>` : '';
+    return `${heading}<div class="msg-row ${sent ? 'msg-row--sent' : 'msg-row--recv'}">
       <div class="msg-bubble ${sent ? 'msg-bubble--sent' : 'msg-bubble--recv'}">
         <div>${escapeHtml(m.text)}</div>
         <div class="msg-meta">${escapeHtml(m.time)}</div>
@@ -3361,15 +4793,6 @@ function renderThread(){
 }
 
 function selectConversation(id){
-  if (isModularMessagesEnabled() && window.AppMessagesController && typeof window.AppMessagesController.selectConversation === 'function') {
-    return window.AppMessagesController.selectConversation(id, {
-      setActiveConvId: function(v){ activeConvId = v; },
-      getThreads: function(){ return MESSAGES_THREADS; },
-      getActiveConvId: function(){ return activeConvId; },
-      getActiveTab: function(){ return activeMessagesTab; },
-      escapeHtml: escapeHtml
-    });
-  }
   activeConvId = id;
   renderConvList();
   renderThread();
@@ -3391,31 +4814,34 @@ function getQueuedMessagesFallback(){
 }
 
 function getQueuedMessagesData(){
-  var useApi = !!(window.AppConfig && window.AppConfig.useApi);
-  if (!useApi || !window.AppApiClient || typeof window.AppApiClient.get !== 'function') {
-    return getQueuedMessagesFallback();
+  if (!window.AppApiIntegration || typeof window.AppApiIntegration.getCampaignQueuedMessages !== 'function') {
+    return Promise.resolve({ rows: [] });
   }
-  var campaignId = getRunTrackingCampaignId();
-  return window.AppApiClient.get('/api/v1/runs', { campaign_id: campaignId }).then(function(resp){
-    var items = Array.isArray(resp && resp.items) ? resp.items : [];
+  var context = getCampaignDetailFetchContext();
+  return window.AppApiIntegration.getCampaignQueuedMessages({
+    email: context.email,
+    env: context.env,
+    campaign_id: context.campaign_id,
+    page: 1,
+    page_size: 20
+  }).then(function(resp){
+    var items = Array.isArray(resp && resp.Messages) ? resp.Messages : [];
     var rows = [];
-    items.forEach(function(run){
-      var queued = Array.isArray(run && run.queued_messages) ? run.queued_messages : [];
-      queued.forEach(function(msg){
+    items.forEach(function(conv){
+      var leadUrl = conv && (conv.leadUrl || conv.lead_url || conv.profile_url || '—');
+      var msgs = Array.isArray(conv && conv.messages) ? conv.messages : [];
+      msgs.forEach(function(msg){
         rows.push({
-          aiSdr: msg.ai_sdr_email || msg.aiSdrEmail || msg.sender || (getAppState().aiSdrEmail || '—'),
-          leadUrl: msg.lead_url || msg.profile_url || msg.url || '—',
-          message: msg.text || msg.message || msg.preview || 'Queued message'
+          aiSdr: (getAppState().aiSdrEmail || '—'),
+          leadUrl: leadUrl || '—',
+          message: msg && msg.text ? msg.text : 'Queued message'
         });
       });
     });
-    if (!rows.length) {
-      return getQueuedMessagesFallback();
-    }
     return { rows: rows };
   }).catch(function(){
-    showGlobalError('Queued messages API failed. Using fallback data.');
-    return getQueuedMessagesFallback();
+    showGlobalError('Queued messages API failed.');
+    return { rows: [] };
   });
 }
 
@@ -3429,36 +4855,57 @@ function syncLegacyMessagesTabsUi(){
   });
   var chat = document.getElementById('msg-chat-panel');
   var queued = document.getElementById('msg-queued-panel');
-  if (chat) chat.hidden = activeMessagesTab === 'queued';
-  if (queued) queued.hidden = activeMessagesTab !== 'queued';
+  if (chat) chat.hidden = false;
+  if (queued) queued.hidden = true;
 }
 
 function bindLegacyMessagesTabs(){
+  if (typeof console !== 'undefined' && typeof console.log === 'function') {
+    console.log('bindLegacyMessagesTabs INIT');
+  }
   if (window.__legacyMessagesTabsBound) return;
   window.__legacyMessagesTabsBound = true;
-  var group = document.getElementById('messages-tab-group');
-  if (!group) return;
-  group.addEventListener('click', function(event){
-    var tab = event.target && event.target.closest && event.target.closest('.messages-tab');
-    if (!tab || !group.contains(tab)) return;
+  if (window.__messagesTabDelegatedBound) return;
+  window.__messagesTabDelegatedBound = true;
+  document.addEventListener('click', async function(event){
+    var tab = event.target && event.target.closest ? event.target.closest('.messages-tab') : null;
+    if (!tab) return;
+    var group = document.getElementById('messages-tab-group');
+    if (!group || !group.contains(tab)) return;
     activeMessagesTab = normalizeMessagesRouteTab(tab.getAttribute('data-tab') || 'sent');
+    if (typeof console !== 'undefined' && typeof console.log === 'function') {
+      console.log('Messages tab clicked (delegated)');
+      console.log('Active Tab:', activeMessagesTab);
+    }
+    var convListEl = document.getElementById('msg-conv-list');
+    if (convListEl) {
+      convListEl.innerHTML = '<div class="campaign-setup-empty"><p style="margin:0;">' + (activeMessagesTab === 'queued' ? 'Loading queued messages...' : 'Loading messages...') + '</p></div>';
+    }
+    try {
+      var targetTab = normalizeMessagesRouteTab(tab.getAttribute('data-tab') || 'sent');
+      var needsInitialLoad = !DATA_ALREADY_LOADED[targetTab];
+      if (!needsInitialLoad) {
+        renderConvList();
+        renderThread();
+        updateMessagesLoadMoreUi();
+      } else {
+        PAGINATION[targetTab].page = 1;
+        PAGINATION[targetTab].hasMore = true;
+        await hydrateConversationsFromApi({ tab: targetTab, append: false });
+      }
+    } catch (err) {
+      if (typeof console !== 'undefined' && typeof console.error === 'function') {
+        console.error('Inbox API failed:', err);
+      }
+    }
     var messagesEl = document.getElementById('screen-messages');
     if (messagesEl && messagesEl.classList.contains('active')) updateHashForScreen('screen-messages');
     syncLegacyMessagesTabsUi();
-    if (activeMessagesTab === 'queued') {
-      setGlobalLoading(true, 'Loading queued messages…');
-      clearGlobalError();
-      getQueuedMessagesData().then(function(payload){
-        if (window.AppQueuedTable && typeof window.AppQueuedTable.renderQueuedMessages === 'function') {
-          window.AppQueuedTable.renderQueuedMessages(payload);
-        }
-      }).finally(function(){
-        setGlobalLoading(false);
-      });
-      return;
-    }
+    var visible = getThreadsForMessagesTab(activeMessagesTab);
+    if (!visible.some(function(c){ return c.id === activeConvId; })) activeConvId = visible[0] ? visible[0].id : null;
     renderConvList();
     renderThread();
+    updateMessagesLoadMoreUi();
   });
 }
 
@@ -3471,45 +4918,13 @@ function showMessages(){
   }
   showAppScreen('screen-messages', { skipRouteSync: !!opts.skipRouteSync });
   if (!activeMessagesTab) activeMessagesTab = 'sent';
-  hydrateConversationsFromApi().then(function(){
-    if (!activeConvId && MESSAGES_THREADS[0]) activeConvId = MESSAGES_THREADS[0].id;
-    if (isModularMessagesEnabled() && window.AppMessagesController && typeof window.AppMessagesController.initMessagesTabs === 'function') {
-      window.AppMessagesController.initMessagesTabs({
-        getThreads: function(){ return MESSAGES_THREADS; },
-        getActiveConvId: function(){ return activeConvId; },
-        setActiveConvId: function(v){ activeConvId = v; },
-        getActiveTab: function(){ return activeMessagesTab; },
-        setActiveTab: function(v){
-          activeMessagesTab = normalizeMessagesRouteTab(v);
-          var messagesEl = document.getElementById('screen-messages');
-          if (messagesEl && messagesEl.classList.contains('active')) updateHashForScreen('screen-messages');
-        },
-        escapeHtml: escapeHtml,
-        getQueuedMessages: getQueuedMessagesData,
-        getQueuedMessagesFallback: getQueuedMessagesFallback,
-        setGlobalLoading: setGlobalLoading,
-        showGlobalError: showGlobalError,
-        clearGlobalError: clearGlobalError
-      });
-      return;
-    }
-    bindLegacyMessagesTabs();
-    syncLegacyMessagesTabsUi();
-    if (activeMessagesTab === 'queued') {
-      setGlobalLoading(true, 'Loading queued messages…');
-      getQueuedMessagesData().then(function(payload){
-        if (window.AppQueuedTable && typeof window.AppQueuedTable.renderQueuedMessages === 'function') {
-          window.AppQueuedTable.renderQueuedMessages(payload);
-        }
-      }).finally(function(){
-        setGlobalLoading(false);
-      });
-      return;
-    }
-    renderConvList();
-    renderThread();
-  });
+  bindLegacyMessagesTabs();
+  syncLegacyMessagesTabsUi();
 }
+
+document.addEventListener('DOMContentLoaded', function(){
+  bindLegacyMessagesTabs();
+});
 
 function backFromMessages(){
   var opts = arguments[0] || {};
@@ -3523,20 +4938,12 @@ function backFromMessages(){
 }
 
 function sendDummyChatLine(){
-  if (isModularMessagesEnabled() && window.AppMessagesController && typeof window.AppMessagesController.sendDummyChatLine === 'function') {
-    return window.AppMessagesController.sendDummyChatLine({
-      getThreads: function(){ return MESSAGES_THREADS; },
-      getActiveConvId: function(){ return activeConvId; },
-      setActiveConvId: function(v){ activeConvId = v; },
-      getActiveTab: function(){ return activeMessagesTab; },
-      escapeHtml: escapeHtml
-    });
-  }
   const input = document.getElementById('msg-input');
   if (!input || !activeConvId) return;
   const t = (input.value || '').trim();
   if (!t) return;
-  const conv = MESSAGES_THREADS.find(x => x.id === activeConvId);
+  const source = getThreadsForMessagesTab(activeMessagesTab).concat(MESSAGES_BY_TAB.all || []);
+  const conv = source.find(x => x.id === activeConvId);
   if (!conv) return;
   if (window.AppApiIntegration && typeof window.AppApiIntegration.sendMessage === 'function') {
     setGlobalLoading(true, 'Sending message…');
@@ -3547,12 +4954,13 @@ function sendDummyChatLine(){
       if (resp && resp.message) {
         conv.messages.push({
           dir: resp.message.dir || 'sent',
+          dirRaw: (resp.message.dir || 'sent') === 'recv' ? 'in' : 'out',
           text: resp.message.text || t,
           time: resp.message.time || new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
         });
       } else {
         const time = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-        conv.messages.push({ dir: 'sent', text: t, time: time });
+        conv.messages.push({ dir: 'sent', dirRaw: 'out', text: t, time: time });
       }
       conv.preview = t.length > 60 ? t.slice(0, 57) + '…' : t;
       conv.time = 'Just now';
@@ -3561,7 +4969,7 @@ function sendDummyChatLine(){
       renderThread();
     }).catch(function(){
       const time = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-      conv.messages.push({ dir: 'sent', text: t, time: time });
+      conv.messages.push({ dir: 'sent', dirRaw: 'out', text: t, time: time });
       conv.preview = t.length > 60 ? t.slice(0, 57) + '…' : t;
       conv.time = 'Just now';
       input.value = '';
@@ -3574,7 +4982,7 @@ function sendDummyChatLine(){
     return;
   }
   const time = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-  conv.messages.push({ dir: 'sent', text: t, time: time });
+  conv.messages.push({ dir: 'sent', dirRaw: 'out', text: t, time: time });
   conv.preview = t.length > 60 ? t.slice(0, 57) + '…' : t;
   conv.time = 'Just now';
   input.value = '';
@@ -3594,7 +5002,8 @@ function statusPill(s){
   const map = {
     queued:'pill-queued',
     waiting:'pill-waiting',
-    completed:'pill-completed',
+    completed:'pill-done',
+    running:'pill-running',
     done:'pill-done',
     failed:'pill-fail',
     accepted:'pill-done',
@@ -3605,7 +5014,13 @@ function statusPill(s){
     replied:'pill-done',
     'no reply':'pill-q'
   };
-  const label = raw ? (raw.charAt(0).toUpperCase() + raw.slice(1)) : 'Queued';
+  const labelMap = {
+    completed: '🟢 Completed',
+    waiting: '🟡 Waiting',
+    failed: '🔴 Failed',
+    running: '🔵 Running'
+  };
+  const label = labelMap[raw] || (raw ? (raw.charAt(0).toUpperCase() + raw.slice(1)) : 'Queued');
   return `<span class="pill ${map[raw]||'pill-queued'}">${label}</span>`;
 }
 
@@ -3622,12 +5037,58 @@ function renderTable(key, filter){
   const tbody = document.getElementById('lead-tbody');
   thead.innerHTML = '<tr>' + d.cols.map(c=>`<th>${c}</th>`).join('') + '</tr>';
   if (rows.length === 0) {
-    tbody.innerHTML = '<tr><td class="empty-state" colspan="' + d.cols.length + '"><div class="empty-state-inner"><div class="empty-state-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>No rows match this filter. Try another pill above.</div></td></tr>';
+    var emptyText = key === 'profile-views'
+      ? 'No profile views found'
+      : (key === 'posts-liked'
+        ? 'No posts liked yet'
+        : (key === 'accepted-profiles' ? 'No accepted profiles yet' : 'No rows match this filter. Try another pill above.'));
+    tbody.innerHTML = '<tr><td class="empty-state" colspan="' + d.cols.length + '"><div class="empty-state-inner"><div class="empty-state-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div>' + emptyText + '</div></td></tr>';
+    return;
+  }
+  if (key === 'recent-runs') {
+    tbody.innerHTML = rows.slice().sort(function(a, b){
+      var aTs = Number(a && a.sortTs);
+      var bTs = Number(b && b.sortTs);
+      if (isNaN(aTs)) aTs = 0;
+      if (isNaN(bTs)) bTs = 0;
+      return bTs - aTs;
+    }).map(function(r){
+      var rawUrl = String((r && r.url) || '').trim();
+      var href = rawUrl ? (/^https?:\/\//i.test(rawUrl) ? rawUrl : ('https://' + rawUrl)) : '';
+      var leadSlug = formatLead(rawUrl || (r && r.name) || '—');
+      var leadCell = href
+        ? `<a class="url-link" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(leadSlug)}</a>`
+        : escapeHtml(leadSlug || '—');
+      var resultText = String((r && r.result) || '—');
+      var resultClass = resultText.indexOf('Success') > -1 ? 'recent-result recent-result--ok'
+        : (resultText.indexOf('Failed') > -1 ? 'recent-result recent-result--fail' : 'recent-result');
+      return `<tr>
+        <td>${leadCell}</td>
+        <td>${statusPill(r.status)}</td>
+        <td title="${escapeHtml(String((r && r.action) || '—'))}">${escapeHtml(String((r && r.action) || '—'))}</td>
+        <td><span class="${resultClass}">${escapeHtml(resultText)}</span></td>
+        <td style="color:var(--color-text-secondary)">${escapeHtml(String((r && r.time) || '—'))}</td>
+      </tr>`;
+    }).join('');
     return;
   }
   tbody.innerHTML = rows.map(r => {
     const nameCell = `<div class="lead-name-cell"><div class="avatar" style="background:${r.color};color:${r.textColor};">${r.initials}</div><span>${r.name}</span></div>`;
-    const urlCell = `<a class="url-link" href="https://${r.url}" target="_blank" rel="noopener noreferrer">${r.url}</a>`;
+    const rawUrl = String(r.url || '').trim();
+    const hrefUrl = rawUrl ? (/^https?:\/\//i.test(rawUrl) ? rawUrl : ('https://' + rawUrl)) : '';
+    const displayUrl = rawUrl.replace(/^https?:\/\//i, '');
+    var slugMatch = displayUrl.match(/linkedin\.com\/in\/([^\/?#]+)/i);
+    var slugText = slugMatch && slugMatch[1] ? slugMatch[1] : displayUrl;
+    const urlCell = hrefUrl ? `<a class="url-link" href="${hrefUrl}" target="_blank" rel="noopener noreferrer">${slugText}</a>` : '—';
+    if (key === 'profile-views') {
+      return `<tr><td>${nameCell}</td><td>${urlCell}</td><td style="color:var(--color-text-secondary)">${r.time || '—'}</td></tr>`;
+    }
+    if (key === 'posts-liked') {
+      return `<tr><td>${nameCell}</td><td>${urlCell}</td><td style="color:var(--color-text-secondary)">${r.time || '—'}</td></tr>`;
+    }
+    if (key === 'accepted-profiles') {
+      return `<tr><td>${nameCell}</td><td>${urlCell}</td><td style="color:var(--color-text-secondary)">${r.time || '—'}</td></tr>`;
+    }
     let extra = '';
     if(d.cols.length === 5) extra = `<td>${r.action}</td><td>${statusPill(r.status)}</td><td style="color:var(--color-text-secondary)">${r.time}</td>`;
     else if(d.cols.length === 4 && d.cols[2]==='Sent at') extra = `<td style="color:var(--color-text-secondary)">${r.time}</td><td>${statusPill(r.status)}</td>`;
@@ -3923,6 +5384,7 @@ function renderFailedActions(){
   if (isModularDashboardEnabled() && window.AppFailedActionsPanel && typeof window.AppFailedActionsPanel.renderFailedActionsPanel === 'function') {
     window.AppFailedActionsPanel.renderFailedActionsPanel({
       failedActions: FAILED_ACTIONS,
+      emptyMessage: failedActionsEmptyMessage,
       failedActionLogsAvailable: failedActionLogsAvailable,
       escapeHtml: escapeHtml,
       openShotModal: openShotModal,
@@ -3939,6 +5401,11 @@ function renderFailedActions(){
   }
   var mount = document.getElementById('failed-actions-list');
   if (!mount) return;
+  if (!FAILED_ACTIONS.length) {
+    mount.innerHTML = '<div class="failed-actions-empty" role="status" aria-live="polite">' + escapeHtml(failedActionsEmptyMessage) + '</div>';
+    refreshDashboardMonitoring();
+    return;
+  }
   var eye = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
   var docIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>';
   mount.innerHTML = FAILED_ACTIONS.map(function(item, i){

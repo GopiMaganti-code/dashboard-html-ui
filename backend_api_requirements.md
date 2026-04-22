@@ -76,6 +76,7 @@ The frontend is already modularized and expects stable API contracts with low en
 | `/api/v1/messages-run` | POST | Trigger messages run job |
 | `/api/v1/messages-run/{campaign_id}` | GET | Get latest messages run status for campaign |
 | `/api/v1/runs` | GET | Run history for dashboard recent runs; **optional `metrics` per item** |
+| `/admin/network/campaign-ips` | POST | Campaign-level IP telemetry with aggregate counters and optional paginated IP rows |
 | `/api/v1/health` | GET | Service health/readiness check |
 
 ---
@@ -788,6 +789,73 @@ Purpose: lightweight liveness/readiness endpoint for platform monitoring, deploy
   }
 }
 ```
+
+---
+
+### 4.14 Campaign IP Monitoring Feed
+`POST /admin/network/campaign-ips`
+
+Purpose: provide campaign-level IP telemetry for Campaign IP Monitoring Dashboard with clear distinction between aggregate metrics and returned IP rows.
+
+#### Request Body
+```json
+{
+  "email": "mailtomagantigopi@gmail.com",
+  "token": "string"
+}
+```
+
+#### Response (required shape)
+```json
+{
+  "email": "mailtomagantigopi@gmail.com",
+  "window_days": 30,
+  "campaigns": [
+    {
+      "campaign_id": "69cff85d86691ec7d7bf8cd8",
+      "last_ts": "2026-04-18T15:15:28.095000",
+      "unique_ips": 58,
+      "events": 183,
+      "ip_rotation": "dynamic",
+      "ips_total": 58,
+      "ips_limit": 25,
+      "ips_offset": 0,
+      "ips_has_more": true,
+      "ips": []
+    }
+  ]
+}
+```
+
+#### `campaigns[].ips` row shape
+```json
+{
+  "ip": "152.57.232.160",
+  "country_code": "IN",
+  "city": "Narsingi",
+  "provider": "iproyal",
+  "mode": "sticky",
+  "sticky_session_id": "mailtomagantigopi@gmail.com--6ec51bdd",
+  "count": 1,
+  "last_ts": "2026-04-18T15:15:28.095000"
+}
+```
+
+#### Validation rules (mandatory)
+
+- **Full dataset response** (`ips_has_more=false` and `ips_offset=0` and `ips_limit >= ips_total`):
+  - `unique_ips === ips.length`
+  - `events === sum(ips[].count)`
+- **Partial dataset response** (any of: `ips_has_more=true`, `ips_offset>0`, `ips_limit < ips_total`):
+  - `ips_total` must be present and `>= ips.length`
+  - `ips_limit` and `ips_offset` must be present
+  - UI must treat `ips[]` as partial and avoid full-dataset assumptions
+
+#### Contract notes
+
+- `unique_ips` and `events` are aggregate values over `window_days`.
+- `ips[]` may be top-N or paginated subset; if subset, metadata fields above are required.
+- Response must not omit pagination metadata when `ips[]` is partial.
 
 ---
 

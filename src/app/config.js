@@ -10,6 +10,19 @@
       QA: 'https://qa-heyr-api.wyra.ai',
       Stage: 'https://stage-heyr-api.wyra.ai',
       Prod: 'https://heyr-v2.wyra.ai'
+    },
+    riskConfig: {
+      thresholds: {
+        high: 65,
+        medium: 35
+      },
+      weights: {
+        static: 25,
+        highCount: 25,
+        geo: 20,
+        burst: 15,
+        session: 15
+      }
     }
   };
 
@@ -89,6 +102,7 @@
     apiOrigin: DEFAULTS.apiOrigin,
     campaignListToken: DEFAULTS.campaignListToken,
     apiOriginsByEnvironment: DEFAULTS.apiOriginsByEnvironment,
+    riskConfig: DEFAULTS.riskConfig,
     resolveApiOrigin: resolveApiOrigin,
     source: resolved.source
   };

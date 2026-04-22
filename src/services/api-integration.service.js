@@ -157,6 +157,7 @@
     var p = params || {};
     var env = typeof p.env === 'string' ? p.env.trim() : '';
     var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var campaignId = p.campaign_id != null ? String(p.campaign_id).trim() : '';
     var path = '/orch/profile-health';
     var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
     var url = path + qs;
@@ -166,18 +167,116 @@
       probe_live_session: false,
       include_action_breakdown: true
     };
+    if (campaignId) payload.campaign_id = campaignId;
+    var headers = env ? { 'X-Environment': env } : {};
+    return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
+  }
+
+  /**
+   * Campaign IP monitoring feed for admin dashboard.
+   * POST /admin/network/campaign-ips?env=...
+   */
+  function getCampaignIps(params){
+    var p = params || {};
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var limit = Number.isFinite(p.limit) ? Math.max(1, Math.min(500, Math.floor(p.limit))) : null;
+    var offset = Number.isFinite(p.offset) ? Math.max(0, Math.floor(p.offset)) : null;
+    var path = '/admin/network/campaign-ips';
+    var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
+    var url = path + qs;
+    var payload = {
+      email: email,
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : ''
+    };
+    if (limit != null) payload.limit = limit;
+    if (offset != null) payload.offset = offset;
+    var headers = env ? { 'X-Environment': env } : {};
+    return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
+  }
+
+  /**
+   * Campaign activity feed for engagement drill-down.
+   * POST /orch/campaign/activity-all?env=...
+   */
+  function getCampaignActivityAll(params){
+    var p = params || {};
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var action = typeof p.action === 'string' ? p.action.trim() : '';
+    var campaignId = p.campaign_id != null ? String(p.campaign_id).trim() : '';
+    var limit = Number.isFinite(p.limit) ? Math.max(1, Math.min(500, Math.floor(p.limit))) : 100;
+    var offset = Number.isFinite(p.offset) ? Math.max(0, Math.floor(p.offset)) : 0;
+    var includeTimeline = p.include_timeline === true;
+    var includeDebug = p.include_debug === true;
+    var path = '/orch/campaign/activity-all';
+    var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
+    var url = path + qs;
+    var payload = {
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : '',
+      email: email,
+      action: action,
+      campaign_id: campaignId,
+      limit: limit,
+      offset: offset,
+      include_timeline: includeTimeline,
+      include_debug: includeDebug
+    };
+    var headers = env ? { 'X-Environment': env } : {};
+    return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
+  }
+
+  /**
+   * Acceptance secondary action run check.
+   * POST /admin/campaign/secondary-actions/run-acceptance-check?env=...
+   */
+  function runAcceptanceCheck(params){
+    var p = params || {};
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var campaignId = p.campaign_id != null ? String(p.campaign_id).trim() : '';
+    var path = '/admin/campaign/secondary-actions/run-acceptance-check';
+    var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
+    var url = path + qs;
+    var payload = {
+      email: email,
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : '',
+      campaign_id: campaignId
+    };
+    var headers = env ? { 'X-Environment': env } : {};
+    return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
+  }
+
+  /**
+   * Messages secondary action run check.
+   * POST /admin/campaign/secondary-actions/run-messages-check?env=...
+   */
+  function runMessagesCheck(params){
+    var p = params || {};
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var campaignId = p.campaign_id != null ? String(p.campaign_id).trim() : '';
+    var path = '/admin/campaign/secondary-actions/run-messages-check';
+    var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
+    var url = path + qs;
+    var payload = {
+      email: email,
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : '',
+      campaign_id: campaignId
+    };
     var headers = env ? { 'X-Environment': env } : {};
     return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
   }
 
   /**
    * Failed action screenshots DB feed for monitoring panel.
-   * GET /admin/screenshots/db?token=...&limit=...&user_id=...
+   * GET /admin/screenshots/db?token=...&limit=...&user_id=...&campaign_id=...
    */
   function getFailedActionsScreenshotsDb(params){
     var p = params || {};
     var env = typeof p.env === 'string' ? p.env.trim() : '';
     var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var campaignId = p.campaign_id != null ? String(p.campaign_id).trim() : '';
     var limit = Number.isFinite(p.limit) ? Math.max(1, Math.min(200, Math.floor(p.limit))) : 100;
     var path = '/admin/screenshots/db';
     var query = {
@@ -185,6 +284,7 @@
       limit: limit,
       user_id: email
     };
+    if (campaignId) query.campaign_id = campaignId;
     var headers = env ? { 'X-Environment': env } : {};
     return global.AppApiClient.get(path, query, { headers: headers, environment: env });
   }
@@ -199,6 +299,56 @@
 
   function getConversations(params){
     return global.AppApiClient.get(baseUrl() + '/conversations', params || {});
+  }
+
+  /**
+   * Inbox messages feed for Communication -> Messages section.
+   * POST /orch/inbox-messages?env=...
+   */
+  function getInboxMessages(params){
+    var p = params || {};
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var campaignId = p.campaign_id != null ? String(p.campaign_id).trim() : '';
+    var page = Number.isFinite(p.page) ? Math.max(1, Math.floor(p.page)) : 1;
+    var pageSize = Number.isFinite(p.page_size) ? Math.max(1, Math.min(200, Math.floor(p.page_size))) : 20;
+    var path = '/orch/inbox-messages';
+    var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
+    var url = path + qs;
+    var payload = {
+      email: email,
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : '',
+      page: page,
+      page_size: pageSize
+    };
+    if (campaignId) payload.campaign_id = campaignId;
+    var headers = env ? { 'X-Environment': env } : {};
+    return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
+  }
+
+  /**
+   * Queued messages for Communication -> Messages section.
+   * POST /orch/campaign/queued-messages?env=...
+   */
+  function getCampaignQueuedMessages(params){
+    var p = params || {};
+    var env = typeof p.env === 'string' ? p.env.trim() : '';
+    var email = typeof p.email === 'string' ? p.email.trim() : '';
+    var campaignId = p.campaign_id != null ? String(p.campaign_id).trim() : '';
+    var page = Number.isFinite(p.page) ? Math.max(1, Math.floor(p.page)) : 1;
+    var pageSize = Number.isFinite(p.page_size) ? Math.max(1, Math.min(200, Math.floor(p.page_size))) : 20;
+    var path = '/orch/campaign/queued-messages';
+    var qs = env ? ('?env=' + encodeURIComponent(env)) : '';
+    var url = path + qs;
+    var payload = {
+      email: email,
+      token: (global.AppConfig && global.AppConfig.campaignListToken) ? global.AppConfig.campaignListToken : '',
+      page: page,
+      page_size: pageSize
+    };
+    if (campaignId) payload.campaign_id = campaignId;
+    var headers = env ? { 'X-Environment': env } : {};
+    return global.AppApiClient.post(url, payload, { headers: headers, environment: env });
   }
 
   function sendMessage(conversationId, payload){
@@ -242,10 +392,16 @@
     getOverview: safe(getOverview),
     getDetail: safe(getDetail),
     getConversations: safe(getConversations),
+    getInboxMessages: getInboxMessages,
+    getCampaignQueuedMessages: getCampaignQueuedMessages,
     sendMessage: safe(sendMessage),
     getCampaignLeadsAll: getCampaignLeadsAll,
     getCampaignDetail: getCampaignDetail,
     getProfileHealth: getProfileHealth,
+    getCampaignIps: getCampaignIps,
+    getCampaignActivityAll: getCampaignActivityAll,
+    runAcceptanceCheck: runAcceptanceCheck,
+    runMessagesCheck: runMessagesCheck,
     getFailedActionsScreenshotsDb: getFailedActionsScreenshotsDb,
     getFailedActionDetail: safe(getFailedActionDetail),
     postRun: safe(postRun),
