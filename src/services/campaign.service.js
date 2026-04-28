@@ -80,11 +80,36 @@
       ? '<button type="button" class="btn-monitor" data-campaign-id="' + idAttr + '">Monitor</button>'
       : '<span class="campaign-monospace">—</span>';
     var rowCls = 'campaign-row--' + campaignListRowTone(c.status);
+    var counts = c && c.actionCountsDistinct ? c.actionCountsDistinct : {};
+    var totalLeadsRaw = c && c.totalLeads != null
+      ? c.totalLeads
+      : (c && c.total_leads != null
+        ? c.total_leads
+        : (c && c.counters && c.counters.total != null ? c.counters.total : 0));
+    var totalLeads = Number(totalLeadsRaw);
+    if (!Number.isFinite(totalLeads)) totalLeads = 0;
+    totalLeads = Math.max(0, Math.floor(totalLeads));
+    function countNum(value){
+      var n = Number(value);
+      if (!Number.isFinite(n)) return 0;
+      return Math.max(0, Math.floor(n));
+    }
+    var activityHtml = '<div class="campaign-activity-badges">' +
+      '<span class="campaign-activity-pill" title="Total leads in this campaign">📊 Leads: ' + totalLeads + '</span>' +
+      '<span class="campaign-activity-pill" title="Profile views">👀 ' + countNum(counts.views) + '</span>' +
+      '<span class="campaign-activity-pill" title="Connections sent">🤝 ' + countNum(counts.connections_sent) + '</span>' +
+      '<span class="campaign-activity-pill" title="Messages sent">💬 ' + countNum(counts.messages_sent) + '</span>' +
+      '<span class="campaign-activity-pill" title="Posts liked">❤️ ' + countNum(counts.like_post) + '</span>' +
+      '<span class="campaign-activity-pill" title="Connected">✅ ' + countNum(counts.connected) + '</span>' +
+      '<span class="campaign-activity-pill" title="Pending">⏳ ' + countNum(counts.not_connected_yet) + '</span>' +
+      '<span class="campaign-activity-pill" title="Replies">📩 ' + countNum(counts.replied) + '</span>' +
+      '</div>';
     return '<tr class="' + rowCls + '">' +
       '<td data-label="Campaign">' + nameBlock + '</td>' +
       '<td data-label="AI SDR email"><span class="campaign-monospace">' + helpers.escapeHtml(email) + '</span></td>' +
       '<td data-label="Environment">' + helpers.escapeHtml(env) + '</td>' +
       '<td data-label="Status">' + helpers.statusBadgeHtml(c.status) + '</td>' +
+      '<td data-label="Activity">' + activityHtml + '</td>' +
       '<td data-label="Created">' + helpers.escapeHtml(helpers.formatCampaignCreatedAt(iso)) + '</td>' +
       '<td data-label="Actions">' + monitorBtn + '</td>' +
       '</tr>';
